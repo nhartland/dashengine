@@ -50,6 +50,7 @@ class BigQueryResult:
     source:         BigQuery
     result:         pd.DataFrame
     time_duration:  datetime.time
+    # bytes billed: float # Would be nice, probably needs modification of pandas_gbq
     # data_processed: float # Would be nice, probably needs modification of pandas_gbq
 
 
@@ -98,6 +99,7 @@ def get(query_id: str) -> BigQueryResult:
     Returns:
         (BigQueryResult): The results of the query.
     """
+    #TODO get the query time from the BQ metadata itself rather than timing
     query = load_query(query_id)
     starttime = time.time()
     query_result = gbq.read_gbq(query.body)
