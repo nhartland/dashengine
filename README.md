@@ -15,7 +15,11 @@ principle features:
 1. Queries are stored and versioned independently of the overall code.
 2. Queries should be parametrisable, there should be a system for replacing tags
    such as ```{%param_name%}``` with a user-supplied parameter at
-   query-execution time.
+   query-execution time. Either that or through the use of BQ [Parameterized
+   Queries](https://cloud.google.com/bigquery/docs/parameterized-queries),
+   although those do not support table or column names as parameters.
+   Potentially we should only allow {PROJECT_NAME} as a parameter outside of BQ
+   standard queries for security reasons.
 3. Queries should be performed asynchronously for performance.
 4. Query results should be cached per dashboard page-view for performance.
 5. Queries should have their performance metrics (time, data use) recorded.
