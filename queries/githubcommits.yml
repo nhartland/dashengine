@@ -1,0 +1,4 @@
+# Example query
+name:        "GitHub repo commits"
+description: "BigQuery public dataset for testing"
+body:        "SELECT * FROM `bigquery-public-data.github_repos.commits` LIMIT 100"
