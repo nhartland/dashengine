@@ -1,2 +1,5 @@
-instance_class: F2 # 256 MB memory
 runtime: python37
+instance_class: B4 
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 2m
