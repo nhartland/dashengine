@@ -23,6 +23,8 @@ principle features:
 ### Dashboard system
 1. Each dashboard page should be built around a dataset of queries setup
    when the page is first viewed.
+2. There should be a `meta` dashboard for each page, giving the time cost of
+   each query.
 
 ## Planning
 
