@@ -1,1 +1,2 @@
+instance_class: F2 # 256 MB memory
 runtime: python37
