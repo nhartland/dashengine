@@ -1,7 +1,6 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-import concurrent.futures
 import bigquery
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -9,17 +8,55 @@ dash_app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app = dash_app.server
 
 
-datasets = ["githubcommits"]
-dataset_results = {}
-with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-    dataset_jobs = {executor.submit(bigquery.get, dataset): dataset for dataset in datasets}
-    for ds_job in concurrent.futures.as_completed(dataset_jobs):
-        source = dataset_jobs[ds_job]
-        try:
-            data = ds_job.result()
-            dataset_results[source] = data
-        except Exception as exc:
-            print('%r generated an exception: %s' % (source, exc))
+# Prefetch data for this dashboard
+bigquery.prefetch(["githubcommits", "githubcommits2"])
+df = bigquery.fetch("githubcommits")
+
+
+def query_timing_graph():
+    """ Generates a graph showing the timings of the cached datasets. """
+    query_ids = []
+    query_times = []
+    for qid, query in bigquery.list().items():
+        query_ids.append(qid)
+        query_times.append(query.duration)
+
+    return dcc.Graph(
+        id='time-performance',
+        figure={
+            'data': [
+                {'x': query_ids, 'y': query_times, 'type': 'bar'}
+            ],
+            'layout': {
+                'title': 'Query Cost (Time)',
+                'yaxis': { 'title': 'Query duration (s)'}
+            }
+        }
+    )
+
+
+def query_memory_graph():
+    """ Generates a graph showing the memory (MB) usage of the cached datasets. """
+    query_ids = []
+    query_memory = []
+    for qid, query in bigquery.list().items():
+        query_ids.append(qid)
+        memory = query.result.memory_usage(index=True, deep=True).sum()
+        query_memory.append(memory/1E6)
+
+    return dcc.Graph(
+        id='memory-performance',
+        figure={
+            'data': [
+                {'x': query_ids, 'y': query_memory, 'type': 'bar'}
+            ],
+            'layout': {
+                'title': 'Query Cost (Memory)',
+                'yaxis': { 'title': 'Memory use (MB)'}
+            }
+        }
+    )
+
 
 dash_app.layout = html.Div(className="container", children=[
     html.H1(children='DashEngine Example'),
@@ -29,19 +66,8 @@ dash_app.layout = html.Div(className="container", children=[
     '''),
 
     html.Div(children=f"Active project used for querying: {bigquery.project_id()}"),
-
-    dcc.Graph(
-        id='example-graph',
-        figure={
-            'data': [
-                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'SF'},
-                {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': u'Montréal'},
-            ],
-            'layout': {
-                'title': 'Dash Data Visualization'
-            }
-        }
-    )
+    query_timing_graph(),
+    query_memory_graph()
 ])
 
 if __name__ == '__main__':
