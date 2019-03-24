@@ -16,6 +16,9 @@ gbq.context.dialect = DIALECT
 gbq.context.project = PROJECT_ID
 gbq.context.credentials = CREDENTIALS
 
+# Basic caching of queries by ID in a dictionary
+QUERY_CACHE = {}
+
 
 @dataclass(frozen=True)
 class BigQuery:
@@ -44,12 +47,15 @@ class BigQueryResult:
     a BigQuery dataset, along with some metadata.
 
     Attributes:
+        source (BigQuery): The query that generated this result.
         result (pandas.DataFrame): The pandas DataFrame containing the result.
-        time_duration  (datetime.time): The execution time of the query.
+        time   (datetime.time): The execution time of the query.
+        duration (datetime.time): The time taken to execute the query.
     """
-    source:         BigQuery
-    result:         pd.DataFrame
-    time_duration:  datetime.time
+    source:   BigQuery
+    result:   pd.DataFrame
+    time:     datetime.time
+    duration: datetime.time
     # bytes billed: float # Would be nice, probably needs modification of pandas_gbq
     # data_processed: float # Would be nice, probably needs modification of pandas_gbq
 
@@ -99,10 +105,21 @@ def get(query_id: str) -> BigQueryResult:
     Returns:
         (BigQueryResult): The results of the query.
     """
-    #TODO get the query time from the BQ metadata itself rather than timing
-    query = load_query(query_id)
-    starttime = time.time()
-    query_result = gbq.read_gbq(query.body)
-    query_time = time.time() - starttime
-    bqr = BigQueryResult(query, query_result, query_time)
-    return bqr
+    # Check for caching: should also add a cache expiry here
+    #TODO add cache expiry, force-refresh options
+    if query_id not in QUERY_CACHE:
+        #TODO get the query time from the BQ metadata itself rather than timing
+        query = load_query(query_id)
+        starttime = time.time()
+        query_result = gbq.read_gbq(query.body)
+        query_time = time.time()
+        query_duration = query_time - starttime
+
+        # Form up results class
+        bqr = BigQueryResult(query,
+                             query_result,
+                             query_time,
+                             query_duration)
+        QUERY_CACHE[query_id] = bqr
+
+    return QUERY_CACHE[query_id]
