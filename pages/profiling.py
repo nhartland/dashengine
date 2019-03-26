@@ -52,13 +52,14 @@ def _query_memory_graph(ds: DataSet) -> dcc.Graph:
 
 def layout(ds: DataSet) -> html.Div:
     return html.Div(className="container", children=[
-        html.H1(children='DashEngine Example'),
+        html.H1(children='Query Profiling'),
 
         html.Div(children='''
-            This is an example of a dashboard on the Dash framework, running on Google App Engine.
+            Summarised here are the performance characteristics of active queries.
         '''),
 
         html.Div(children=f"Active project used for querying: {credentials.project_id()}"),
+        dcc.Link('Go back to the landing page', href='/'),
         _query_timing_graph(ds),
         _query_memory_graph(ds)
     ])
