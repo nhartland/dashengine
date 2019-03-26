@@ -30,3 +30,9 @@ def fetch() -> tuple:
     else:
         msg = "Cannot find appropriate credentials, is GOOGLE_APPLICATION_CREDENTIALS set?"
         raise RuntimeError(msg)
+
+
+def project_id() -> str:
+    """ Returns the ID of the GCP project used for accessing BigQuery."""
+    CREDENTIALS, PROJECT_ID = fetch()
+    return PROJECT_ID

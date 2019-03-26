@@ -6,7 +6,7 @@ import datetime
 import pandas as pd
 import pandas_gbq as gbq
 from dataclasses import dataclass
-import concurrent.futures
+# Local project imports
 import credentials
 
 DIALECT = "standard"
@@ -16,12 +16,6 @@ CREDENTIALS, PROJECT_ID = credentials.fetch()
 gbq.context.dialect = DIALECT
 gbq.context.project = PROJECT_ID
 gbq.context.credentials = CREDENTIALS
-
-# Basic caching of queries by ID in a dictionary
-# Requests for datasets are pushed to QUERY_REQUESTS,
-# then a call to update_cache moves them into QUERY_CACHE
-QUERY_REQUESTS = []
-QUERY_CACHE = {}
 
 
 @dataclass(frozen=True)
@@ -90,11 +84,6 @@ def load_query(query_id: str) -> BigQuery:
             raise exc
 
 
-def project_id() -> str:
-    """ Returns the ID of the GCP project used for accessing BigQuery."""
-    return PROJECT_ID
-
-
 def run_query(query_id: str) -> BigQueryResult:
     """ Performs a query over BigQuery and returns the result.
 
@@ -122,67 +111,3 @@ def run_query(query_id: str) -> BigQueryResult:
                          query_time,
                          query_duration)
     return bqr
-
-
-def update_query_cache():
-    """ Update the query cache.
-
-        This method runs over existing query reuqests in the queue and adds
-        them to the local cache.
-    """
-    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        jobs = {}
-        # Form a dictionary of required jobs
-        for qid in QUERY_REQUESTS:
-            if qid not in QUERY_CACHE:
-                jobs[executor.submit(run_query, qid)] = qid
-        # Loop over job results
-        for ds_job in concurrent.futures.as_completed(jobs):
-            queryid = jobs[ds_job]
-            try:
-                query_data = ds_job.result()
-                QUERY_CACHE[queryid] = query_data
-            except Exception as exc:
-                print('%r generated an exception: %s' % (queryid, exc))
-    # Clear cache
-    QUERY_REQUESTS.clear()
-
-
-def prefetch(query_ids: list):
-    """ Pre-register a list of queryIDs for use in the report.
-
-        This function appends a provided list of query IDs to the
-        queue for fetching. On the next call to fetch() all of these
-        queries will be performed asynchronously.
-    """
-    QUERY_REQUESTS.extend(query_ids)
-
-
-def fetch(query_id: str) -> BigQueryResult:
-    """ Retrieves data from the local BigQuery results cache.
-
-    This checks the provided query ID against a local query results cache, if
-    the result is already present it returns the existing result. If the result
-    is not present the cache is updated. In either case a query result is
-    returned.
-
-    Args:
-        query_id (str): A string identifier for the query.
-
-    Returns:
-        (BigQueryResult): The results of the query.
-    """
-    # Check for query in cache: should also add a cache expiry here
-    #TODO add cache expiry, force-refresh options
-    if query_id not in QUERY_CACHE:
-        QUERY_REQUESTS.append(query_id)
-        # Run async update over all the requests in the queue
-        update_query_cache()
-    return QUERY_CACHE[query_id]
-
-
-# TODO should return an immutable view rather than the results themselves
-def list() -> dict:
-    """ Returns the dictionary of cached queries."""
-    return QUERY_CACHE
-
