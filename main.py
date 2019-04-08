@@ -5,7 +5,7 @@ from dash.dependencies import Input, Output
 # Local project
 from dataset import DataSet
 import pages.landing   as landing
-import pages.profiling as profiling
+import system.profiling as profiling
 import dashapp
 
 dash_app = dashapp.app
