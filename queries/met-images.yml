@@ -1,0 +1,4 @@
+# Example query
+name:        "The Met Collection: Images"
+description: "BigQuery public dataset for testing"
+body:        "SELECT * FROM `bigquery-public-data.the_met.images` LIMIT 1000"

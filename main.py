@@ -14,8 +14,7 @@ app = dash_app.server
 # Setup dataset cache
 ds = DataSet()
 # Prefetch data for this dashboard
-ds.prefetch(["githubcommits", "githubcommits2"])
-df = ds.fetch("githubcommits")
+ds.prefetch(["met-objects", "met-images"])
 
 dash_app.layout = html.Div([
     dcc.Location(id='url', refresh=False),

@@ -70,5 +70,6 @@ class DataSet:
     # TODO should return an immutable view rather than the results themselves
     def list(self) -> dict:
         """ Returns the dictionary of cached queries."""
+        self.update_query_cache()
         return self.query_cache
 
