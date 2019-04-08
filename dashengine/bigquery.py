@@ -7,7 +7,7 @@ import pandas as pd
 import pandas_gbq as gbq
 from dataclasses import dataclass
 # Local project imports
-import credentials
+import dashengine.credentials as credentials
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"

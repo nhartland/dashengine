@@ -1,8 +1,10 @@
 """ Page for the monitoring of query performance characteristics. """
+# Dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dataset import DataSet
-import credentials
+# DashEngine
+from dashengine.dataset import DataSet
+import dashengine.credentials as credentials
 
 
 def _query_timing_graph(ds: DataSet) -> dcc.Graph:

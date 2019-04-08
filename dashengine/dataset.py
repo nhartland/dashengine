@@ -1,6 +1,6 @@
 """ This module handles the caching of query results for use across all app pages """
 import concurrent.futures
-import bigquery as bq
+import dashengine.bigquery as bq
 
 
 class DataSet:

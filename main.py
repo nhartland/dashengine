@@ -3,10 +3,10 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 # Local project
-from dataset import DataSet
-import pages.landing   as landing
-import system.profiling as profiling
-import dashapp
+from dashengine.dataset import DataSet
+import dashengine.dashapp as dashapp
+import pages.landing as landing
+import stdpages.profiling as profiling
 
 dash_app = dashapp.app
 app = dash_app.server
