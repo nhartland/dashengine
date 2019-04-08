@@ -8,6 +8,7 @@ import pandas_gbq as gbq
 from dataclasses import dataclass
 # Local project imports
 import dashengine.credentials as credentials
+from dashengine.dashapp import dashcache as dashcache
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
@@ -84,6 +85,8 @@ def load_query(query_id: str) -> BigQuery:
             raise exc
 
 
+# This is slow, so let's cache it
+@dashcache.memoize(timeout=3600)
 def run_query(query_id: str) -> BigQueryResult:
     """ Performs a query over BigQuery and returns the result.
 

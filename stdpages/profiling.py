@@ -3,19 +3,25 @@
 import dash_core_components as dcc
 import dash_html_components as html
 # DashEngine
-from dashengine.dataset import DataSet
+import dashengine.bigquery as bigquery
 import dashengine.credentials as credentials
 
 # Route for profiling page
 ROUTE = "/profile"
 
+#TODO Add table displaying age of cached queries
 
-def _query_timing_graph(ds: DataSet) -> dcc.Graph:
+#TODO parse these from the queries subdirectory
+queries = ["met-images", "met-objects"]
+
+
+def _query_timing_graph() -> dcc.Graph:
     """ Generates a graph showing the timings of the cached datasets. """
     query_ids = []
     query_times = []
-    for qid, query in ds.list().items():
+    for qid in queries:
         query_ids.append(qid)
+        query = bigquery.run_query(qid)
         query_times.append(query.duration)
 
     return dcc.Graph(
@@ -32,12 +38,13 @@ def _query_timing_graph(ds: DataSet) -> dcc.Graph:
     )
 
 
-def _query_memory_graph(ds: DataSet) -> dcc.Graph:
+def _query_memory_graph() -> dcc.Graph:
     """ Generates a graph showing the memory (MB) usage of the cached datasets. """
     query_ids = []
     query_memory = []
-    for qid, query in ds.list().items():
+    for qid in queries:
         query_ids.append(qid)
+        query = bigquery.run_query(qid)
         memory = query.result.memory_usage(index=True, deep=True).sum()
         query_memory.append(memory/1E6)
 
@@ -55,7 +62,7 @@ def _query_memory_graph(ds: DataSet) -> dcc.Graph:
     )
 
 
-def layout(ds: DataSet) -> html.Div:
+def layout() -> html.Div:
     return html.Div(className="container", children=[
         html.H1(children='Query Profiling'),
 
@@ -65,6 +72,6 @@ def layout(ds: DataSet) -> html.Div:
 
         html.Div(children=f"Active project used for querying: {credentials.project_id()}"),
         dcc.Link('Go back to the landing page', href='/'),
-        _query_timing_graph(ds),
-        _query_memory_graph(ds)
+        _query_timing_graph(),
+        _query_memory_graph()
     ])

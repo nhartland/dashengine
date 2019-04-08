@@ -7,7 +7,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 # Local project
-from dashengine.dataset import DataSet
 from dashengine.dashapp import dashapp
 
 
@@ -31,12 +30,6 @@ logging.basicConfig(level=logging.INFO)
 # Setup 'app' variable for GAE
 app = dashapp.server
 
-# Setup dataset cache
-ds = DataSet()
-
-# Prefetch data for this dashboard
-ds.prefetch(["met-objects", "met-images"])
-
 # Read page modules
 all_pages = page_loader(["pages", "stdpages"])
 
@@ -49,7 +42,7 @@ dashapp.layout = html.Div([
                   [Input('url', 'pathname')])
 def display_page(pathname: str) -> html.Div:
     if pathname in all_pages:
-        return all_pages[pathname].layout(ds)
+        return all_pages[pathname].layout()
     else:
         return '404'
 

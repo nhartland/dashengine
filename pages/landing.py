@@ -1,14 +1,13 @@
 """ Landing Page for the Dash App. """
 import dash_core_components as dcc
 import dash_html_components as html
-from dashengine.dataset import DataSet
 import dashengine.credentials as credentials
 
 # Default route
 ROUTE = "/"
 
 
-def layout(ds: DataSet) -> html.Div:
+def layout() -> html.Div:
     return html.Div(className="container", children=[
         html.H1(children='DashEngine'),
 

@@ -1,2 +1,4 @@
+.mypy_cache
+dashengine-cache
 *.pyc
 *.DS_Store
