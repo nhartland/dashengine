@@ -4,6 +4,9 @@ import dash_html_components as html
 from dashengine.dataset import DataSet
 import dashengine.credentials as credentials
 
+# Default route
+ROUTE = "/"
+
 
 def layout(ds: DataSet) -> html.Div:
     return html.Div(className="container", children=[

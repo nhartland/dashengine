@@ -1,37 +1,57 @@
+import pkgutil
+import importlib
+import logging
 # Dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 # Local project
 from dashengine.dataset import DataSet
-import dashengine.dashapp as dashapp
-import pages.landing as landing
-import stdpages.profiling as profiling
+from dashengine.dashapp import dashapp
 
-dash_app = dashapp.app
-app = dash_app.server
+
+def page_loader(roots: list):
+    """ Reads page modules from subdirectories specified in the `roots` list,
+    and returns them in a dictionary keyed by module.ROUTE. """
+    page_dict = {}
+    for root in roots:
+        for importer, package_name, _ in pkgutil.iter_modules([root]):
+            full_package_name = '%s.%s' % (root, package_name)
+            module = importlib.import_module(full_package_name)
+            route = module.ROUTE
+            logging.info(f'Page module \"{package_name}\" loaded at route \"{route}\"')
+            page_dict[route] = module
+    return page_dict
+
+
+# Setup logging level
+logging.basicConfig(level=logging.INFO)
+
+# Setup 'app' variable for GAE
+app = dashapp.server
 
 # Setup dataset cache
 ds = DataSet()
+
 # Prefetch data for this dashboard
 ds.prefetch(["met-objects", "met-images"])
 
-dash_app.layout = html.Div([
+# Read page modules
+all_pages = page_loader(["pages", "stdpages"])
+
+dashapp.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content')
 ])
 
-
-@dash_app.callback(Output('page-content', 'children'),
-                   [Input('url', 'pathname')])
+@dashapp.callback(Output('page-content', 'children'),
+                  [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/':
-        return landing.layout(ds)
-    if pathname == '/profile':
-        return profiling.layout(ds)
+    if pathname in all_pages:
+        return all_pages[pathname].layout(ds)
     else:
         return '404'
 
 
 if __name__ == '__main__':
-    dash_app.run_server(debug=True)
+    dashapp.run_server(debug=True)

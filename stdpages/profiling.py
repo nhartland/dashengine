@@ -6,6 +6,9 @@ import dash_html_components as html
 from dashengine.dataset import DataSet
 import dashengine.credentials as credentials
 
+# Route for profiling page
+ROUTE = "/profile"
+
 
 def _query_timing_graph(ds: DataSet) -> dcc.Graph:
     """ Generates a graph showing the timings of the cached datasets. """
