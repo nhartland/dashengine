@@ -1,0 +1,4 @@
+# Example query
+name:        "The Met Collection: Objects"
+description: "BigQuery public dataset for testing"
+body:        "SELECT department, object_begin_date FROM `bigquery-public-data.the_met.objects` WHERE `object_begin_date` > 1900"

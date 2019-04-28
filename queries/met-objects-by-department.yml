@@ -1,0 +1,4 @@
+# Example query
+name:        "The Met Collection: Objects per department"
+description: "Query counts the number of objects per department"
+body:        "SELECT `department`, COUNT(*) as `n_items` FROM `bigquery-public-data.the_met.objects` WHERE `object_begin_date` > 1900 GROUP BY `department`"

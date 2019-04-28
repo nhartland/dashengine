@@ -11,4 +11,4 @@ dashcache = Cache(dashapp.server, config={
     'CACHE_DIR': 'dashengine-cache'
 })
 
-# App.config.suppress_callback_exceptions = True
+dashapp.config.suppress_callback_exceptions = True

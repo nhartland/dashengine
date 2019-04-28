@@ -17,6 +17,8 @@ def page_loader(roots: list) -> dict:
             module = importlib.import_module(full_package_name)
             route = module.ROUTE
             logging.info(f'Page module \"{package_name}\" loaded at route \"{route}\"')
+            if route in page_dict:
+                raise RuntimeError(f'Page module \"{package_name}\" tried to load at already existing route \"{route}\"')
             page_dict[route] = module
     return page_dict
 
