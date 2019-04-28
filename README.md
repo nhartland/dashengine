@@ -30,6 +30,14 @@ principle features:
 2. There should be a `meta` dashboard for each page, giving the time cost of
    each query.
 
+### Credentials
+
+Are obtained through `google.auth.default`.
+
+For how to set these credentials when working locally with a project, [see the
+documentation
+here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
+
 ## Planning
 
 I'll start by setting up a basic Dash dashboard system with a BigQuery link
