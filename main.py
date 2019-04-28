@@ -7,7 +7,6 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 # Local project
 from dashengine.dashapp import dashapp
-import dashengine.bigquery as bigquery
 import dashengine.pageloader as pageloader
 
 
@@ -28,11 +27,14 @@ dashapp.layout = html.Div([
 @dashapp.callback(Output('page-content', 'children'),
                   [Input('url', 'pathname')])
 def display_page(pathname: str) -> html.Div:
-    menu_opts = [dbc.DropdownMenuItem(mod.LINKNAME, href=mod.ROUTE) for mod in ALL_PAGES.values()]
+    menu_opts = [dbc.DropdownMenuItem(mod.LINKNAME,
+                                      href=mod.ROUTE,
+                                      active=(pathname == mod.ROUTE))
+                                      for mod in ALL_PAGES.values()]
     if pathname in ALL_PAGES:
         return [ dbc.NavbarSimple(  # First build the navigation bar
                  children=[
-                     dbc.NavbarBrand(f"{bigquery.PROJECT_ID}"),
+                     #  dbc.NavbarBrand(f"{bigquery.PROJECT_ID}"), # Displays the project ID in the NavBar
                      dbc.DropdownMenu(
                          nav=True,
                          in_navbar=True,
@@ -40,7 +42,7 @@ def display_page(pathname: str) -> html.Div:
                          children=menu_opts
                      ),
                  ],
-                 brand=f"{ALL_PAGES[pathname].LINKNAME}",
+                 brand=f"{ALL_PAGES[pathname].TITLE}",
                  brand_href="/",
                  sticky="top",
                  ),                 # Secondly render the page layout

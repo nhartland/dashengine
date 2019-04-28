@@ -9,6 +9,8 @@ import dashengine.bigquery as bigquery
 ROUTE = "/profile"
 # Name used when linking, for example in the navigation bar
 LINKNAME = "Profiling"
+# Title for rendering in the navbar
+TITLE = "Query performance profiling"
 
 #TODO Add table displaying age of cached queries
 
@@ -64,7 +66,6 @@ def _query_memory_graph() -> dcc.Graph:
 
 def layout() -> html.Div:
     return html.Div(className="container", children=[
-        html.Div(children=f"Active project used for querying: {bigquery.PROJECT_ID}"),
         _query_timing_graph(),
         _query_memory_graph()
     ])
