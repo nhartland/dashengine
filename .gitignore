@@ -1,4 +1,5 @@
 .mypy_cache
 dashengine-cache
+__pycache__
 *.pyc
 *.DS_Store
