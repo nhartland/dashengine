@@ -1,6 +1,4 @@
 # System
-import pkgutil
-import importlib
 import logging
 # Dash
 import dash_core_components as dcc
@@ -8,20 +6,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 # Local project
 from dashengine.dashapp import dashapp
-
-
-def page_loader(roots: list) -> dict:
-    """ Reads page modules from subdirectories specified in the `roots` list,
-    and returns them in a dictionary keyed by module.ROUTE. """
-    page_dict = {}
-    for root in roots:
-        for importer, package_name, _ in pkgutil.iter_modules([root]):
-            full_package_name = '%s.%s' % (root, package_name)
-            module = importlib.import_module(full_package_name)
-            route = module.ROUTE
-            logging.info(f'Page module \"{package_name}\" loaded at route \"{route}\"')
-            page_dict[route] = module
-    return page_dict
+import dashengine.navigation as navigation
 
 
 # Setup logging level
@@ -31,7 +16,8 @@ logging.basicConfig(level=logging.DEBUG)
 app = dashapp.server
 
 # Read page modules
-all_pages = page_loader(["pages", "stdpages"])
+ALL_PAGES = navigation.page_loader(["pages", "stdpages"])
+NAV_BAR = navigation.navigation_bar(ALL_PAGES)
 
 dashapp.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -41,8 +27,8 @@ dashapp.layout = html.Div([
 @dashapp.callback(Output('page-content', 'children'),
                   [Input('url', 'pathname')])
 def display_page(pathname: str) -> html.Div:
-    if pathname in all_pages:
-        return all_pages[pathname].layout()
+    if pathname in ALL_PAGES:
+        return [NAV_BAR, ALL_PAGES[pathname].layout()]
     else:
         return '404'
 

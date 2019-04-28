@@ -5,6 +5,8 @@ import dashengine.bigquery as bigquery
 
 # Default route
 ROUTE = "/"
+# Name used when linking (for example in the navigation bar)
+LINKNAME = "Landing"
 
 with open('README.md', 'r') as readme_file:
     README = readme_file.read()
@@ -14,6 +16,5 @@ def layout() -> html.Div:
     return html.Div(className="container", children=[
         html.Div([
             dcc.Markdown(README)
-        ]),
-        dcc.Link('Query Profiling', href='/profile')
+        ])
     ])

@@ -1,9 +1,9 @@
 """ Principle dash app module """
 import dash
 from flask_caching import Cache
+import dash_bootstrap_components as dbc
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-dashapp = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+dashapp = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # App-Level cache
 dashcache = Cache(dashapp.server, config={
