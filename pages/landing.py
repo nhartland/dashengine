@@ -6,14 +6,14 @@ import dashengine.bigquery as bigquery
 # Default route
 ROUTE = "/"
 
+with open('README.md', 'r') as readme_file:
+    README = readme_file.read()
+
 
 def layout() -> html.Div:
     return html.Div(className="container", children=[
-        html.H1(children='DashEngine'),
-
-        html.Div(children=f'''
-            This is the landing page for the dash application.
-            Running in the GCP environment {bigquery.PROJECT_ID}
-        '''),
+        html.Div([
+            dcc.Markdown(README)
+        ]),
         dcc.Link('Query Profiling', href='/profile')
     ])
