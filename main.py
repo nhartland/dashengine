@@ -25,7 +25,7 @@ def page_loader(roots: list) -> dict:
 
 
 # Setup logging level
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 # Setup 'app' variable for GAE
 app = dashapp.server

@@ -1,4 +1,6 @@
 """ Page for the monitoring of query performance characteristics. """
+# System
+import os
 # Dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -11,14 +13,12 @@ ROUTE = "/profile"
 
 #TODO Add table displaying age of cached queries
 
-#TODO parse these from the queries subdirectory
-queries = ["met-images", "met-objects"]
-
 
 def _query_timing_graph() -> dcc.Graph:
     """ Generates a graph showing the timings of the cached datasets. """
     query_ids = []
     query_times = []
+    queries = bigquery.list_available_queries()
     for qid in queries:
         query_ids.append(qid)
         query = bigquery.run_query(qid)
@@ -42,6 +42,7 @@ def _query_memory_graph() -> dcc.Graph:
     """ Generates a graph showing the memory (MB) usage of the cached datasets. """
     query_ids = []
     query_memory = []
+    queries = bigquery.list_available_queries()
     for qid in queries:
         query_ids.append(qid)
         query = bigquery.run_query(qid)

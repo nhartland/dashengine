@@ -85,6 +85,16 @@ def load_query(query_id: str) -> BigQuery:
             raise exc
 
 
+def list_available_queries() -> list:
+    """ Lists the available query IDs """
+    queries = []
+    for filename in os.listdir(QUERY_DATA_DIRECTORY):
+        if filename.endswith(".yml"):
+            splitnames = os.path.splitext(filename)
+            queries.append(splitnames[0])
+    return queries
+
+
 # This is slow, so let's cache it
 @dashcache.memoize(timeout=3600)
 def run_query(query_id: str) -> BigQueryResult:
