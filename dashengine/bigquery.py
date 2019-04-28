@@ -3,16 +3,16 @@ import yaml
 import time
 import logging
 import datetime
+import google.auth
 import pandas as pd
 import pandas_gbq as gbq
 from dataclasses import dataclass
 # Local project imports
-import dashengine.credentials as credentials
 from dashengine.dashapp import dashcache as dashcache
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
-CREDENTIALS, PROJECT_ID = credentials.fetch()
+CREDENTIALS, PROJECT_ID = google.auth.default()
 
 gbq.context.dialect = DIALECT
 gbq.context.project = PROJECT_ID

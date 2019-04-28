@@ -1,12 +1,9 @@
 """ Page for the monitoring of query performance characteristics. """
-# System
-import os
 # Dash
 import dash_core_components as dcc
 import dash_html_components as html
 # DashEngine
 import dashengine.bigquery as bigquery
-import dashengine.credentials as credentials
 
 # Route for profiling page
 ROUTE = "/profile"
@@ -71,7 +68,7 @@ def layout() -> html.Div:
             Summarised here are the performance characteristics of active queries.
         '''),
 
-        html.Div(children=f"Active project used for querying: {credentials.project_id()}"),
+        html.Div(children=f"Active project used for querying: {bigquery.PROJECT_ID}"),
         dcc.Link('Go back to the landing page', href='/'),
         _query_timing_graph(),
         _query_memory_graph()
