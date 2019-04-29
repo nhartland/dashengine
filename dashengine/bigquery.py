@@ -7,8 +7,6 @@ import google.auth
 import pandas as pd
 import pandas_gbq as gbq
 from dataclasses import dataclass
-# Local project imports
-from dashengine.dashapp import dashcache as dashcache
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
@@ -95,8 +93,7 @@ def list_available_queries() -> list:
     return queries
 
 
-# This is slow, so let's cache it
-@dashcache.memoize(timeout=3600)
+#TODO Somehow cache results without using FileSystem
 def run_query(query_id: str) -> BigQueryResult:
     """ Performs a query over BigQuery and returns the result.
 

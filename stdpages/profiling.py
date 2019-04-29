@@ -12,8 +12,6 @@ LINKNAME = "Profiling"
 # Title for rendering in the navbar
 TITLE = "Query performance profiling"
 
-#TODO Add table displaying age of cached queries
-
 
 def _query_timing_graph() -> dcc.Graph:
     """ Generates a graph showing the timings of the cached datasets. """

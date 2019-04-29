@@ -42,3 +42,10 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 
 I'll start by setting up a basic Dash dashboard system with a BigQuery link
 and build from there.
+
+### TODO
+
+1. Setup parametrisable queries
+2. Fix the met-demo callback not running at start (may be that the callback is
+   attatched before a layout?, see the exception supression in dashapp)
+3. 'Refresh' data button
