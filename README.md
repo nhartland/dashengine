@@ -49,3 +49,7 @@ and build from there.
 2. Fix the met-demo callback not running at start (may be that the callback is
    attatched before a layout?, see the exception supression in dashapp)
 3. 'Refresh' data button
+4. Setup a nice navigation bar e.g from dash-bootstrap-components, but one
+   that plays well with AppEngine.
+5. Use tinyDB for memory caching
+   (https://www.reddit.com/r/googlecloud/comments/bl4rrr/gae_python_3_tinydb_for_memcache/)
