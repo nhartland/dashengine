@@ -1,18 +1,18 @@
 import os
 import yaml
-import time
 import logging
 import datetime
 import google.auth
 import pandas as pd
+from tinydb import TinyDB, Query
+from tinydb.storages import MemoryStorage
 from dataclasses import dataclass
 from google.cloud import bigquery
 
-# Caching through TinyDB
-from tinydb import TinyDB, Query
-from tinydb.storages import MemoryStorage
-
-CACHE = TinyDB(storage=MemoryStorage)
+# Create cache table in TinyDB: Note cache_size is set to zero
+# here to disable caching of **TinyDB queries** not BigQuery ones.
+CACHE_DB = TinyDB(storage=MemoryStorage)
+CACHE_TABLE = CACHE_DB.table('dashengine-cache', cache_size=0)
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
@@ -36,8 +36,7 @@ class BigQuery:
     body:         str
 
 
-#TODO add query parameters, should be able to do {%param_name%} in the query body
-# and have this replaced at query time.
+#TODO Add BigQuery parameterised queries
 @dataclass(frozen=True)
 class BigQueryResult:
     """ Results of a BigQuery request.
@@ -92,7 +91,7 @@ def fetch_cached_queries() -> list:
             (list): A list of all cached queries in the form of BigQueryResult objects.
     """
     cached_queries = []
-    for query in CACHE:
+    for query in CACHE_TABLE:
         cached_queries.append(query["result"])
     return cached_queries
 
@@ -112,7 +111,7 @@ def run_query(query_id: str) -> BigQueryResult:
         (BigQueryResult): The results of the query.
     """
     # Check cache for existing result
-    cache_check = CACHE.get(Query().query_id == query_id)
+    cache_check = CACHE_TABLE.get(Query().query_id == query_id)
     if cache_check and cache_check["result"]:
         return cache_check["result"]
 
@@ -132,5 +131,5 @@ def run_query(query_id: str) -> BigQueryResult:
                          query_result.total_bytes_processed)
 
     # Insert result in cache
-    CACHE.insert({'query_id': query_id, 'result': bqr})
+    CACHE_TABLE.insert({'query_id': query_id, 'result': bqr})
     return bqr
