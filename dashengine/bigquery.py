@@ -55,8 +55,8 @@ class BigQueryResult:
     result:   pd.DataFrame
     time:     datetime.time
     duration: datetime.time
-    # bytes billed: float # Would be nice
-    # data_processed: float # Would be nice
+    bytes_billed: float
+    data_processed: float
 
 
 def load_query(query_id: str) -> BigQuery:
@@ -85,14 +85,16 @@ def load_query(query_id: str) -> BigQuery:
             raise exc
 
 
-def list_available_queries() -> list:
-    """ Lists the available query IDs """
-    queries = []
-    for filename in os.listdir(QUERY_DATA_DIRECTORY):
-        if filename.endswith(".yml"):
-            splitnames = os.path.splitext(filename)
-            queries.append(splitnames[0])
-    return queries
+def fetch_cached_queries() -> list:
+    """ Lists all cached queries.
+
+        Returns:
+            (list): A list of all cached queries in the form of BigQueryResult objects.
+    """
+    cached_queries = []
+    for query in CACHE:
+        cached_queries.append(query["result"])
+    return cached_queries
 
 
 def run_query(query_id: str) -> BigQueryResult:
@@ -114,21 +116,20 @@ def run_query(query_id: str) -> BigQueryResult:
     if cache_check and cache_check["result"]:
         return cache_check["result"]
 
-    #TODO get the query time from the BQ metadata itself rather than timing
     # Setup BigQuery client
     client = bigquery.Client()
     # Read query
     query = load_query(query_id)
-    starttime = time.time()
-    query_result = client.query(query.body).to_dataframe()
-    query_time = time.time()
-    query_duration = query_time - starttime
-
+    # Run query
+    query_result = client.query(query.body)
+    query_data = query_result.to_dataframe()
     # Form up results class
     bqr = BigQueryResult(query,
-                         query_result,
-                         query_time,
-                         query_duration)
+                         query_data,
+                         query_result.ended,
+                         (query_result.ended - query_result.started).seconds,
+                         query_result.total_bytes_billed,
+                         query_result.total_bytes_processed)
 
     # Insert result in cache
     CACHE.insert({'query_id': query_id, 'result': bqr})
