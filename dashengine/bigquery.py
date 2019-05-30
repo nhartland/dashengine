@@ -5,16 +5,12 @@ import logging
 import datetime
 import google.auth
 import pandas as pd
-import pandas_gbq as gbq
 from dataclasses import dataclass
+from google.cloud import bigquery
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
 CREDENTIALS, PROJECT_ID = google.auth.default()
-
-gbq.context.dialect = DIALECT
-gbq.context.project = PROJECT_ID
-gbq.context.credentials = CREDENTIALS
 
 
 @dataclass(frozen=True)
@@ -53,8 +49,8 @@ class BigQueryResult:
     result:   pd.DataFrame
     time:     datetime.time
     duration: datetime.time
-    # bytes billed: float # Would be nice, probably needs modification of pandas_gbq
-    # data_processed: float # Would be nice, probably needs modification of pandas_gbq
+    # bytes billed: float # Would be nice
+    # data_processed: float # Would be nice
 
 
 def load_query(query_id: str) -> BigQuery:
@@ -109,9 +105,12 @@ def run_query(query_id: str) -> BigQueryResult:
         (BigQueryResult): The results of the query.
     """
     #TODO get the query time from the BQ metadata itself rather than timing
+    # Setup BigQuery client
+    client = bigquery.Client()
+    # Read query
     query = load_query(query_id)
     starttime = time.time()
-    query_result = gbq.read_gbq(query.body)
+    query_result = client.query(query.body).to_dataframe()
     query_time = time.time()
     query_duration = query_time - starttime
 
