@@ -53,5 +53,6 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 
 1. Setup parametrisable queries
 2. Fix the met-demo callback not running at start (may be that the callback is
-   attatched before a layout?, see the exception supression in dashapp)
+   attached before a layout?, see the exception suppression in dashapp)
 3. 'Refresh' data button
+4. Final documentation, quickstart, skeleton page, etc
