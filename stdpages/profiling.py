@@ -45,19 +45,19 @@ def layout() -> html.Div:
     """ Generates the layout for the query profiling page. """
     # Compute performance metrics
     queries = bigquery.fetch_cached_queries()
-    query_ids             = [query.source.name     for query in queries]
-    query_duration        = [query.duration        for query in queries]
-    query_bytes_processed = [query.bytes_processed for query in queries]
-    query_bytes_billed    = [query.bytes_billed    for query in queries]
-    query_memory          = [query.memory_usage()  for query in queries]
+    query_ids             = [query.source.name           for query in queries]
+    query_duration        = [query.duration              for query in queries]
+    query_bytes_processed = [query.bytes_processed / 1E6 for query in queries]
+    query_bytes_billed    = [query.bytes_billed / 1E6    for query in queries]
+    query_memory          = [query.memory_usage()        for query in queries]
 
     return html.Div(className="container", children=[
         _query_profile_chart('profiler-memory-performance', 'Memory Usage', 'Memory use (MB)',
                              query_ids, query_memory),
         _query_profile_chart('profiler-time-performance', 'Query Duration', 'Duration (s)',
                              query_ids, query_duration),
-        _query_profile_chart('profiler-bytes-processed', 'Processed Bytes ', 'Processed Bytes',
+        _query_profile_chart('profiler-bytes-processed', 'Processed Data ', 'Processed Data (MB)',
                              query_ids, query_bytes_processed),
-        _query_profile_chart('profiler-bytes-billed', 'Billed Bytes', 'Billed Bytes',
+        _query_profile_chart('profiler-bytes-billed', 'Billed Data', 'Billed Data (MB)',
                              query_ids, query_bytes_billed)
     ])

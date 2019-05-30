@@ -49,13 +49,19 @@ class BigQueryResult:
         result (pandas.DataFrame): The pandas DataFrame containing the result.
         time   (datetime.time): The execution time of the query.
         duration (datetime.time): The time taken to execute the query.
+        bytes_billed (float): The amount of billable bytes processed in BQ.
+        bytes_processed (float): The total number of bytes processed in BQ.
     """
     source:   BigQuery
     result:   pd.DataFrame
     time:     datetime.time
     duration: datetime.time
     bytes_billed: float
-    data_processed: float
+    bytes_processed: float
+
+    def memory_usage(self) -> float:
+        """ Returns the memory usage of the stored dataframe in MB. """
+        return self.result.memory_usage(index=True, deep=True).sum() / 1.E6
 
 
 def load_query(query_id: str) -> BigQuery:
