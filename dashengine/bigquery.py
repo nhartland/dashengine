@@ -126,7 +126,7 @@ def run_query(query_id: str) -> BigQueryResult:
     bqr = BigQueryResult(query,
                          query_data,
                          query_result.ended,
-                         (query_result.ended - query_result.started).seconds,
+                         (query_result.ended - query_result.started).microseconds / 1.E6,
                          query_result.total_bytes_billed,
                          query_result.total_bytes_processed)
 
