@@ -24,11 +24,20 @@ principle features:
 4. Query results should be cached per dashboard page-view for performance.
 5. Queries should have their performance metrics (time, data use) recorded.
 
+
 ### Dashboard system
 1. Each dashboard page should be built around a dataset of queries setup
    when the page is first viewed.
 2. There should be a `meta` dashboard for each page, giving the time cost of
    each query.
+
+### Query caching
+Query results are cached in memory via
+[TinyDB](https://tinydb.readthedocs.io/en/latest/). Note that this means the
+developer must be careful about memory usage to fit into GAE standard memory
+limits. The general principle being that any heavy-lifting should be done in the
+SQL queries rather than on the GAE instance. Furthermore this caching, being
+in-memory through TinyDB, is not preserved across instances.
 
 ### Credentials
 
@@ -49,7 +58,4 @@ and build from there.
 2. Fix the met-demo callback not running at start (may be that the callback is
    attatched before a layout?, see the exception supression in dashapp)
 3. 'Refresh' data button
-4. Setup a nice navigation bar e.g from dash-bootstrap-components, but one
-   that plays well with AppEngine.
-5. Use tinyDB for memory caching
-   (https://www.reddit.com/r/googlecloud/comments/bl4rrr/gae_python_3_tinydb_for_memcache/)
+4. Re-establish asynchronous querying

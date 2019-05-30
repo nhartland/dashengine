@@ -8,6 +8,12 @@ import pandas as pd
 from dataclasses import dataclass
 from google.cloud import bigquery
 
+# Caching through TinyDB
+from tinydb import TinyDB, Query
+from tinydb.storages import MemoryStorage
+
+CACHE = TinyDB(storage=MemoryStorage)
+
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
 CREDENTIALS, PROJECT_ID = google.auth.default()
@@ -89,7 +95,6 @@ def list_available_queries() -> list:
     return queries
 
 
-#TODO Somehow cache results without using FileSystem
 def run_query(query_id: str) -> BigQueryResult:
     """ Performs a query over BigQuery and returns the result.
 
@@ -104,6 +109,11 @@ def run_query(query_id: str) -> BigQueryResult:
     Returns:
         (BigQueryResult): The results of the query.
     """
+    # Check cache for existing result
+    cache_check = CACHE.get(Query().query_id == query_id)
+    if cache_check and cache_check["result"]:
+        return cache_check["result"]
+
     #TODO get the query time from the BQ metadata itself rather than timing
     # Setup BigQuery client
     client = bigquery.Client()
@@ -119,4 +129,7 @@ def run_query(query_id: str) -> BigQueryResult:
                          query_result,
                          query_time,
                          query_duration)
+
+    # Insert result in cache
+    CACHE.insert({'query_id': query_id, 'result': bqr})
     return bqr
