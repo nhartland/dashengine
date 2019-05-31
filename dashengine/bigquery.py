@@ -163,14 +163,13 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     logger = logging.getLogger(__name__)
     # Check cache for existing result with these parameters
     BQuery = Query()
-    cache_check = CACHE_TABLE.get( (BQuery.query_id == query_id) &
-                                   (BQuery.parameters == parameters)
-                                   )
+    cache_check = CACHE_TABLE.get((BQuery.query_id == query_id) &
+                                  (BQuery.parameters == parameters))
     # Returned cached value if present
     if cache_check and cache_check["result"]:
         result = cache_check["result"]
         params = cache_check["parameters"]
-        logger.info(f"Local cache hit: {query_id} {params}")
+        logger.debug(f"Local cache hit: {query_id} {params}")
         return result
 
     # Setup BigQuery client
@@ -198,7 +197,9 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
 
     # Insert result in cache
     # Note upsert is used here to ensure no duplicates are added due to multiple thread execution
-    CACHE_TABLE.upsert({'query_id': bqr.source.query_id, 'parameters': bqr.parameters, 'result': bqr},
+    CACHE_TABLE.upsert({'query_id': bqr.source.query_id,
+                        'parameters': bqr.parameters,
+                        'result': bqr},
                        (BQuery.query_id == query_id) & (BQuery.parameters == parameters))
-    logger.info(f"New cache entry: {bqr.uuid} {query_id} {parameters}")
+    logger.debug(f"New cache entry: {bqr.uuid} {query_id} {parameters}")
     return bqr

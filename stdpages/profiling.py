@@ -18,8 +18,9 @@ LINKNAME = "Profiling"
 TITLE = "Cached Query Profiler"
 
 
-# Helper
-def fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
+# Helper functions #################################################
+
+def __fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
     """ Fetches a cached BigQuery result from its UUID.
 
         Args:
@@ -39,18 +40,53 @@ def fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
     return selected_query
 
 
-def _query_profile_charts(query: bigquery.BigQueryResult) -> go.Bar:
-    return go.Bar(y=['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed'],
-                  x=[query.memory_usage(),
-                     query.duration,
-                     query.bytes_processed,
-                     query.bytes_billed],
+def __index_query(query, key: str) -> float:
+    """ Returns a property of the query class, keyed by a string.
+        The key must be one of:
+            ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
+
+        Args:
+            query (BigQueryResult): A BigQuery result class
+            key (string): A key of the BigQueryResult object
+
+        Returns:
+            (float): The value in `query` corresponding to the key.
+    """
+    ResultDict = {"Memory": query.memory_usage(),
+                  "Duration": query.duration,
+                  "Bytes Processed": query.bytes_processed,
+                  "Bytes Billed": query.bytes_billed}
+    return ResultDict[key]
+
+
+def __normalising_constants(cached_queries: list):
+    """ Computes totals over the full set of cached queries to normalise the summary chart. """
+    totals = {'Memory': 0.0, 'Duration': 0.0, 'Bytes Processed': 0.0, 'Bytes Billed': 0.0}
+    for query in cached_queries:
+        for key in totals:
+            totals[key] += __index_query(query, key)
+    # Avoid dividing by zero
+    for key in totals:
+        if totals[key] == 0:
+            totals[key] = 1
+    return totals
+
+
+# Dash callbacks #################################################
+
+def _query_profile_charts(query: bigquery.BigQueryResult,
+                          totals: dict) -> go.Bar:
+    """ Generates a set of bar charts for a single query. """
+    yvals = ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
+    return go.Bar(y=yvals,
+                  x=[ 100.0 * __index_query(query, key) / totals[key] for key in yvals],
                   name=query.uuid,
                   orientation='h')
 
 
-def _query_profile_table(cached_queries: list):
+def _query_profile_table(cached_queries: list) -> dt.DataTable:
     """ Generates a table profiling all cached queries. """
+    __normalising_constants(cached_queries)
     # Setup all data for the table
     data = [{"ID": query.source.query_id,
              "UUID": query.uuid,
@@ -80,10 +116,10 @@ def _query_profile_table(cached_queries: list):
     Output('query-profile-body', 'children'),
     [Input('query-profile-table', 'derived_virtual_data'),
      Input('query-profile-table', 'derived_virtual_selected_rows')])
-def _query_profile_body(rows, selected_row_indices):
+def _query_profile_body(rows, selected_row_indices) -> dcc.Markdown:
     """ Returns the formatted SQL body of the selected query. """
     selected_UUID = rows[selected_row_indices[0]]["UUID"]
-    selected_query = fetch_query_from_uuid(selected_UUID)
+    selected_query = __fetch_query_from_uuid(selected_UUID)
 
     # Build query body in markdown code block
     query_code = " ``` \n " + selected_query.source.body + " \n ```"
@@ -97,7 +133,7 @@ def _query_profile_body(rows, selected_row_indices):
 def _query_profile_parameters(rows, selected_row_indices):
     """ Returns the parameters of the selected query. """
     selected_UUID = rows[selected_row_indices[0]]["UUID"]
-    selected_query = fetch_query_from_uuid(selected_UUID)
+    selected_query = __fetch_query_from_uuid(selected_UUID)
     parameters = selected_query.parameters
     if len(parameters) == 0:
         return html.H6("No parameters")
@@ -135,6 +171,8 @@ def _query_profile_details(rows, selected_row_indices) -> list:
              html.Div(id="query-profile-parameters")]
 
 
+# Layout #################################################################
+
 def layout() -> html.Div:
     """ Generates the layout for the query profiling page. """
     # Compute performance metrics
@@ -145,7 +183,8 @@ def layout() -> html.Div:
         return html.H4("No queries in cache",
                        style={"textAlign": "center", "margin-top": "30px"})
 
-    bar_charts = [_query_profile_charts(query) for query in queries]
+    totals = __normalising_constants(queries)
+    bar_charts = [_query_profile_charts(query, totals) for query in queries]
     layout = go.Layout(barmode='stack')
     profile_figure = go.Figure(data=bar_charts, layout=layout)
 
