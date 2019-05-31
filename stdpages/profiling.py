@@ -52,6 +52,7 @@ def layout() -> html.Div:
     query_memory          = [query.memory_usage()        for query in queries]
 
     return html.Div(className="container", children=[
+        "Note: several of these metrics may return zeroes if the result is returned from cache in BigQuery",
         _query_profile_chart('profiler-memory-performance', 'Memory Usage', 'Memory use (MB)',
                              query_ids, query_memory),
         _query_profile_chart('profiler-time-performance', 'Query Duration', 'Duration (s)',
