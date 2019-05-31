@@ -1,5 +1,4 @@
 """ Page for the monitoring of query performance characteristics. """
-import pprint
 # Plotly
 import plotly.graph_objs as go
 # Dash
@@ -22,15 +21,16 @@ TITLE = "Cached Query Profiler"
 def _query_profile_charts(query: bigquery.BigQueryResult) -> go.Bar:
     return go.Bar(y=['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed'],
                   x=[query.memory_usage(), query.duration, query.bytes_processed, query.bytes_billed],
-                  name=query.source.query_id,
+                  name=query.uuid,
                   orientation='h'
                   )
 
 
 def _query_profile_table(cached_queries: list):
-    TableFields = ["ID", "Duration", "Memory Usage", "Bytes Processed", "Bytes Billed"]
+    TableFields = ["ID", "UUID", "Duration", "Memory Usage", "Bytes Processed", "Bytes Billed"]
     columns = [ {"name": i, "id": i} for i in TableFields]
     data = [{"ID": query.source.query_id,
+             "UUID": query.uuid,
              "Duration": query.duration,
              "Memory Usage": query.memory_usage(),
              "Bytes Processed": query.bytes_processed,
@@ -46,17 +46,37 @@ def _query_profile_table(cached_queries: list):
 def get_rows(rows, selected_row_indices):
     if rows is None:
         return "No Query Selected"
-    if len(selected_row_indices) is 0:
+    if len(selected_row_indices) != 1:
         return "No Query Selected"
-    selected_rows = [rows[i] for i in selected_row_indices]
-    return str(selected_rows)
+    selected_UUID = rows[selected_row_indices[0]]["UUID"]
+
+    # Fetch cached queries
+    queries = bigquery.fetch_cached_queries()
+    selected_query = None
+    for query in queries:
+        if query.uuid == selected_UUID:
+            selected_query = query
+    if selected_query is None:
+        raise RuntimeError(f"Cannot find query with UUID {selected_UUID}")
+    query_code = " ``` \n " + selected_query.source.body + " \n ```"
+    query_markdown = dcc.Markdown(query_code)
+
+    parameter_table = dt.DataTable(id='query-profile-parameter-table',
+            columns=[{"name": "Parameter", "id": "Parameter"}, {"name": "Value", "id": "Value"}],
+            data=[{"Parameter": key, "Value": str(value)} for key, value in selected_query.parameters.items()],
+            #style_table={'overflowX': 'scroll'},
+            style_cell={
+                'minWidth': '0px', 'maxWidth': '180px',
+                'whiteSpace': 'normal'
+            })
+
+    return [query_markdown, parameter_table]
 
 
 def layout() -> html.Div:
     """ Generates the layout for the query profiling page. """
     # Compute performance metrics
     queries = bigquery.fetch_cached_queries()
-    print("Hello1")
 
     bar_charts = [_query_profile_charts(query) for query in queries]
     layout = go.Layout(barmode='stack', title='Query Profiling')

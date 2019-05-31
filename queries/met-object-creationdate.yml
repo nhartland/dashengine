@@ -1,7 +1,13 @@
 # Example query
 name:        "The Met Collection: Objects"
 description: "BigQuery public dataset for testing"
-body:        "SELECT department, object_begin_date FROM `bigquery-public-data.the_met.objects` WHERE `object_begin_date` > @creation_date AND department IN UNNEST(@departments)"
+body: |-
+    SELECT department, object_begin_date FROM 
+        `bigquery-public-data.the_met.objects` 
+    WHERE 
+        `object_begin_date` > @creation_date 
+            AND 
+        department IN UNNEST(@departments)
 # List of parameters present in the query body, along with their type. Types should originate from:
 # https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
 parameters:

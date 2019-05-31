@@ -1,5 +1,6 @@
 import os
 import yaml
+import uuid
 import logging
 import datetime
 import google.auth
@@ -48,6 +49,7 @@ class BigQueryResult:
     a BigQuery dataset, along with some metadata.
 
     Attributes:
+        uuid (str): A unique identifying string for this result
         source (BigQuery): The query that generated this result.
         parameters (dict): The dictionary of parameters for this result.
         result (pandas.DataFrame): The pandas DataFrame containing the result.
@@ -56,6 +58,7 @@ class BigQueryResult:
         bytes_billed (float): The amount of billable bytes processed in BQ.
         bytes_processed (float): The total number of bytes processed in BQ.
     """
+    uuid:       str
     source:     BigQuery
     parameters: dict
     result:     pd.DataFrame
@@ -184,7 +187,8 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     query_data = query_result.to_dataframe()
 
     # Form up results class
-    bqr = BigQueryResult(query,
+    bqr = BigQueryResult(str(uuid.uuid4()),
+                         query,
                          parameters,
                          query_data,
                          query_result.ended,
@@ -194,7 +198,7 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
 
     # Insert result in cache
     # Note upsert is used here to ensure no duplicates are added due to multiple thread execution
-    CACHE_TABLE.upsert({'query_id': query_id, 'parameters': parameters, 'result': bqr},
+    CACHE_TABLE.upsert({'query_id': bqr.source.query_id, 'parameters': bqr.parameters, 'result': bqr},
                        (BQuery.query_id == query_id) & (BQuery.parameters == parameters))
-    logger.info(f"New cache entry: {query_id} {parameters}")
+    logger.info(f"New cache entry: {bqr.uuid} {query_id} {parameters}")
     return bqr
