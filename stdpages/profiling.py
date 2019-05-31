@@ -18,59 +18,121 @@ LINKNAME = "Profiling"
 TITLE = "Cached Query Profiler"
 
 
+# Helper
+def fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
+    """ Fetches a cached BigQuery result from its UUID.
+
+        Args:
+            uuid (str): The UUID of the query to be retrieved.
+
+        Returns:
+            (BigQueryResult): The corresponding BigQuery result object.
+    """
+    # Fetch cached queries
+    queries = bigquery.fetch_cached_queries()
+    selected_query = None
+    for query in queries:
+        if query.uuid == uuid:
+            selected_query = query
+    if selected_query is None:
+        raise RuntimeError(f"Cannot find query with UUID {uuid}")
+    return selected_query
+
+
 def _query_profile_charts(query: bigquery.BigQueryResult) -> go.Bar:
     return go.Bar(y=['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed'],
-                  x=[query.memory_usage(), query.duration, query.bytes_processed, query.bytes_billed],
+                  x=[query.memory_usage(),
+                     query.duration,
+                     query.bytes_processed,
+                     query.bytes_billed],
                   name=query.uuid,
-                  orientation='h'
-                  )
+                  orientation='h')
 
 
 def _query_profile_table(cached_queries: list):
-    TableFields = ["ID", "UUID", "Duration", "Memory Usage", "Bytes Processed", "Bytes Billed"]
-    columns = [ {"name": i, "id": i} for i in TableFields]
+    """ Generates a table profiling all cached queries. """
+    # Setup all data for the table
     data = [{"ID": query.source.query_id,
              "UUID": query.uuid,
              "Duration": query.duration,
              "Memory Usage": query.memory_usage(),
              "Bytes Processed": query.bytes_processed,
              "Bytes Billed": query.bytes_billed} for query in cached_queries]
+    # Build list of columns from the data keys
+    columns = [ {"name": i, "id": i} for i in data[0]]
+    # Build datatable
     return dt.DataTable(id='query-profile-table', columns=columns, data=data,
-                        sorting=True, sorting_type="single", row_selectable="single")
+                        sorting=True, sorting_type="single", row_selectable="single",
+                        style_header={
+                            'backgroundColor': 'white',
+                            'fontWeight': 'bold'
+                        },
+                        style_cell_conditional=[
+                            {
+                                'if': {'column_id': c},
+                                'textAlign': 'left'
+                            } for c in ['ID', 'UUID']
+                        ],
+                        style_as_list_view=True)
 
 
 @dashapp.callback(
-    Output('query-profile-text', 'children'),
+    Output('query-profile-body', 'children'),
     [Input('query-profile-table', 'derived_virtual_data'),
      Input('query-profile-table', 'derived_virtual_selected_rows')])
-def get_rows(rows, selected_row_indices):
-    if rows is None:
-        return "No Query Selected"
-    if len(selected_row_indices) != 1:
-        return "No Query Selected"
+def _query_profile_body(rows, selected_row_indices):
+    """ Returns the formatted SQL body of the selected query. """
     selected_UUID = rows[selected_row_indices[0]]["UUID"]
+    selected_query = fetch_query_from_uuid(selected_UUID)
 
-    # Fetch cached queries
-    queries = bigquery.fetch_cached_queries()
-    selected_query = None
-    for query in queries:
-        if query.uuid == selected_UUID:
-            selected_query = query
-    if selected_query is None:
-        raise RuntimeError(f"Cannot find query with UUID {selected_UUID}")
+    # Build query body in markdown code block
     query_code = " ``` \n " + selected_query.source.body + " \n ```"
-    query_markdown = dcc.Markdown(query_code)
+    return dcc.Markdown(query_code)
 
-    parameter_table = dt.DataTable(id='query-profile-parameter-table',
-            columns=[{"name": "Parameter", "id": "Parameter"}, {"name": "Value", "id": "Value"}],
-            data=[{"Parameter": key, "Value": str(value)} for key, value in selected_query.parameters.items()],
-            #style_table={'overflowX': 'scroll'},
-            style_cell={
-                'minWidth': '0px', 'maxWidth': '180px',
-                'whiteSpace': 'normal'
-            })
 
-    return [query_markdown, parameter_table]
+@dashapp.callback(
+    Output('query-profile-parameters', 'children'),
+    [Input('query-profile-table', 'derived_virtual_data'),
+     Input('query-profile-table', 'derived_virtual_selected_rows')])
+def _query_profile_parameters(rows, selected_row_indices):
+    """ Returns the parameters of the selected query. """
+    selected_UUID = rows[selected_row_indices[0]]["UUID"]
+    selected_query = fetch_query_from_uuid(selected_UUID)
+    parameters = selected_query.parameters
+    if len(parameters) == 0:
+        return html.H6("No parameters")
+    # Build a table consisting of query parameters
+    columns = [{"name": "Parameter", "id": "Parameter"},
+               {"name": "Value", "id": "Value"}]
+    parameter_data = [{"Parameter": key, "Value": str(value)}
+                      for key, value in parameters.items()]
+    return dt.DataTable(id='query-profile-parameter-table',
+                        columns=columns,
+                        data=parameter_data,
+                        style_table={"margin-bottom": "30px"},
+                        style_cell={
+                            'minWidth': '0px', 'maxWidth': '180px',
+                            'whiteSpace': 'normal'
+                        })
+
+
+@dashapp.callback(
+    Output('query-profile-details', 'children'),
+    [Input('query-profile-table', 'derived_virtual_data'),
+     Input('query-profile-table', 'derived_virtual_selected_rows')])
+def _query_profile_details(rows, selected_row_indices) -> list:
+    """ Returns the details (SQL and parameters) of the selected query. """
+    if rows is None or len(selected_row_indices) != 1:
+        return [html.H5("Select a query to view details",
+                        style={"textAlign": "center", "margin-top": "30px"})]
+    return [ html.H3("Query Details",
+                     style={"textAlign": "center", "margin-top": "30px"}),
+             html.H4("Query Body",
+                     style={"textAlign": "left", "margin-top": "0px"}),
+             html.Div(id="query-profile-body"),
+             html.H4("Query Parameters",
+                     style={"textAlign": "left", "margin-top": "0px"}),
+             html.Div(id="query-profile-parameters")]
 
 
 def layout() -> html.Div:
@@ -78,13 +140,17 @@ def layout() -> html.Div:
     # Compute performance metrics
     queries = bigquery.fetch_cached_queries()
 
+    # No queries cached
+    if len(queries) == 0:
+        return html.H4("No queries in cache",
+                       style={"textAlign": "center", "margin-top": "30px"})
+
     bar_charts = [_query_profile_charts(query) for query in queries]
-    layout = go.Layout(barmode='stack', title='Query Profiling')
+    layout = go.Layout(barmode='stack')
     profile_figure = go.Figure(data=bar_charts, layout=layout)
 
     return html.Div(className="container", children=[
-        "Note: several of these metrics may return zeroes if the result is returned from cache in BigQuery",
         dcc.Graph(figure=profile_figure),
         _query_profile_table(queries),
-        html.Div(id="query-profile-text")
+        html.Div(id="query-profile-details")
     ])
