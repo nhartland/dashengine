@@ -15,6 +15,11 @@ LINKNAME = "Met Demo"
 TITLE = "Demonstration on Met Data"
 
 
+def available_departments() -> list:
+    """ Returns a list of all departments in the dataset. """
+    return bigquery.run_query("met-objects-by-department").result.department.tolist()
+
+
 def items_by_department() -> go.Figure:
     """ Returns a Graph displaying items per department for the Met."""
     query_data = bigquery.run_query("met-objects-by-department").result
@@ -32,13 +37,30 @@ def items_by_department() -> go.Figure:
                   [Input('met-dropdown-filter', 'value')])
 def items_by_date(selected_department: str) -> go.Figure:
     """ Histogram of items per date, optionally selecting by department."""
-    query_data = bigquery.run_query("met-object-creationdate").result
-    # Filter on selected department
-    if selected_department is not None:
-        query_data = query_data[ query_data["department"] == selected_department]
+    # Running a BQ parametrised query on creation date and departments
+    min_creation_date = 1800
+
+    if selected_department is None:
+        # Use list of all departments
+        parameters = {"creation_date": min_creation_date,
+                      "departments": available_departments()}
+        query_data = bigquery.run_query("met-object-creationdate",
+                                        parameters
+                                        ).result
+    else:
+        # Filter down on a specific department
+        parameters = {"creation_date": min_creation_date,
+                      "departments": [selected_department]}
+        query_data = bigquery.run_query("met-object-creationdate",
+                                        parameters
+                                        ).result
+
+    # Also have the option to query on all departments and filter in pandas. e.g:
+    # query_data = query_data[ query_data["department"] == selected_department]
+
     hist = go.Histogram( x=query_data["object_begin_date"],
                          xbins=dict(
-                         start='1900',
+                         start=str(min_creation_date),
                          end='2000',
                          size='M18'))
     layout = go.Layout( title=go.layout.Title(
@@ -51,7 +73,7 @@ def items_by_date(selected_department: str) -> go.Figure:
 
 def department_dropdown():
     # Dropdown options
-    departments = bigquery.run_query("met-objects-by-department").result.department
+    departments = available_departments()
     return dcc.Dropdown( id="met-dropdown-filter",
                          options=[ {'label': dp, 'value': dp} for dp in departments],
                          placeholder="Filter by department")
