@@ -174,6 +174,21 @@ def _query_profile_parameters(selected_UUID):
 
 
 @dashapp.callback(
+    Output('query-profile-preview', 'children'),
+    [Input('query-profile-selected-uuid', 'data')])
+def _query_profile_preview(selected_UUID) -> dt.DataTable:
+    """ Returns the formatted SQL body of the selected query. """
+    if selected_UUID is None:  # Handle empty selected UUID
+        return dcc.Markdown()
+    selected_query = __fetch_query_from_uuid(selected_UUID)
+    df = selected_query.result.head()
+    return dt.DataTable( id='query-profile-preview-table',
+                         columns=[{"name": i, "id": i} for i in df.columns],
+                         style_table={"margin-bottom": "30px"},
+                         data=df.to_dict('records'))
+
+
+@dashapp.callback(
     Output('query-profile-details', 'children'),
     [Input('query-profile-selected-uuid', 'data')])
 def _query_profile_details(selected_UUID) -> list:
@@ -184,11 +199,14 @@ def _query_profile_details(selected_UUID) -> list:
     return [ html.H3("Query Details",
                      style={"textAlign": "center", "margin-top": "30px"}),
              html.H4("Query Body",
-                     style={"textAlign": "left", "margin-top": "0px"}),
+                     style={"textAlign": "left"}),
              html.Div(id="query-profile-body"),
              html.H4("Query Parameters",
-                     style={"textAlign": "left", "margin-top": "0px"}),
-             html.Div(id="query-profile-parameters")]
+                     style={"textAlign": "left"}),
+             html.Div(id="query-profile-parameters"),
+             html.H4("Query Preview",
+                     style={"textAlign": "left"}),
+             html.Div(id="query-profile-preview")]
 
 
 # Layout #################################################################
