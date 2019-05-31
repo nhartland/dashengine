@@ -34,6 +34,7 @@ def __fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
     selected_query = None
     for query in queries:
         if query.uuid == uuid:
+            # Select a query UUID
             selected_query = query
     if selected_query is None:
         raise RuntimeError(f"Cannot find query with UUID {uuid}")
@@ -121,12 +122,24 @@ def _query_profile_table() -> dt.DataTable:
 
 
 @dashapp.callback(
-    Output('query-profile-body', 'children'),
+    Output('query-profile-selected-uuid', 'data'),
     [Input('query-profile-table', 'derived_virtual_data'),
      Input('query-profile-table', 'derived_virtual_selected_rows')])
-def _query_profile_body(rows, selected_row_indices) -> dcc.Markdown:
+def _update_selected_uuid(rows, selected_row_indices) -> dcc.Markdown:
     """ Returns the formatted SQL body of the selected query. """
+    if rows is None or len(selected_row_indices) != 1:
+        return None
     selected_UUID = rows[selected_row_indices[0]]["UUID"]
+    return selected_UUID
+
+
+@dashapp.callback(
+    Output('query-profile-body', 'children'),
+    [Input('query-profile-selected-uuid', 'data')])
+def _query_profile_body(selected_UUID) -> dcc.Markdown:
+    """ Returns the formatted SQL body of the selected query. """
+    if selected_UUID is None:  # Handle empty selected UUID
+        return dcc.Markdown()
     selected_query = __fetch_query_from_uuid(selected_UUID)
 
     # Build query body in markdown code block
@@ -136,11 +149,11 @@ def _query_profile_body(rows, selected_row_indices) -> dcc.Markdown:
 
 @dashapp.callback(
     Output('query-profile-parameters', 'children'),
-    [Input('query-profile-table', 'derived_virtual_data'),
-     Input('query-profile-table', 'derived_virtual_selected_rows')])
-def _query_profile_parameters(rows, selected_row_indices):
+    [Input('query-profile-selected-uuid', 'data')])
+def _query_profile_parameters(selected_UUID):
     """ Returns the parameters of the selected query. """
-    selected_UUID = rows[selected_row_indices[0]]["UUID"]
+    if selected_UUID is None:  # Handle empty selected UUID
+        return dcc.Markdown()
     selected_query = __fetch_query_from_uuid(selected_UUID)
     parameters = selected_query.parameters
     if len(parameters) == 0:
@@ -162,11 +175,10 @@ def _query_profile_parameters(rows, selected_row_indices):
 
 @dashapp.callback(
     Output('query-profile-details', 'children'),
-    [Input('query-profile-table', 'derived_virtual_data'),
-     Input('query-profile-table', 'derived_virtual_selected_rows')])
-def _query_profile_details(rows, selected_row_indices) -> list:
+    [Input('query-profile-selected-uuid', 'data')])
+def _query_profile_details(selected_UUID) -> list:
     """ Returns the details (SQL and parameters) of the selected query. """
-    if rows is None or len(selected_row_indices) != 1:
+    if selected_UUID is None:  # Handle empty selected UUID
         return [html.H5("Select a query to view details",
                         style={"textAlign": "center", "margin-top": "30px"})]
     return [ html.H3("Query Details",
@@ -189,6 +201,7 @@ def layout() -> html.Div:
                        style={"textAlign": "center", "margin-top": "30px"})
 
     return html.Div(className="container", children=[
+        dcc.Store(id='query-profile-selected-uuid', data=None),
         dcc.Graph(id="query-profile-summary-chart", figure=_query_profile_summary_chart()),
         html.Div(id="query-profile-table-div", children=_query_profile_table()),
         html.Div(id="query-profile-details")
