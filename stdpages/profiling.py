@@ -74,19 +74,27 @@ def __normalising_constants(cached_queries: list):
 
 # Dash callbacks #################################################
 
-def _query_profile_charts(query: bigquery.BigQueryResult,
-                          totals: dict) -> go.Bar:
+def _query_profile_summary() -> go.Figure:
     """ Generates a set of bar charts for a single query. """
+    cached_queries = bigquery.fetch_cached_queries()
     yvals = ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
-    return go.Bar(y=yvals,
-                  x=[ 100.0 * __index_query(query, key) / totals[key] for key in yvals],
-                  name=query.uuid,
-                  orientation='h')
+    totals = __normalising_constants(cached_queries)
+
+    def __bar(query):
+        """ Generate a single bar. """
+        return go.Bar(y=yvals,
+                      x=[ 100 * __index_query(query, key) / totals[key] for key in yvals],
+                      name=query.uuid,
+                      orientation='h')
+
+    bar_charts = [__bar(query) for query in cached_queries]
+    layout = go.Layout(barmode='stack')
+    return go.Figure(data=bar_charts, layout=layout)
 
 
-def _query_profile_table(cached_queries: list) -> dt.DataTable:
+def _query_profile_table() -> dt.DataTable:
     """ Generates a table profiling all cached queries. """
-    __normalising_constants(cached_queries)
+    cached_queries = bigquery.fetch_cached_queries()
     # Setup all data for the table
     data = [{"ID": query.source.query_id,
              "UUID": query.uuid,
@@ -175,21 +183,13 @@ def _query_profile_details(rows, selected_row_indices) -> list:
 
 def layout() -> html.Div:
     """ Generates the layout for the query profiling page. """
-    # Compute performance metrics
-    queries = bigquery.fetch_cached_queries()
-
     # No queries cached
-    if len(queries) == 0:
+    if len(bigquery.fetch_cached_queries()) == 0:
         return html.H4("No queries in cache",
                        style={"textAlign": "center", "margin-top": "30px"})
 
-    totals = __normalising_constants(queries)
-    bar_charts = [_query_profile_charts(query, totals) for query in queries]
-    layout = go.Layout(barmode='stack')
-    profile_figure = go.Figure(data=bar_charts, layout=layout)
-
     return html.Div(className="container", children=[
-        dcc.Graph(figure=profile_figure),
-        _query_profile_table(queries),
+        dcc.Graph(id="query-profile-summary", figure=_query_profile_summary()),
+        html.Div(id="query-profile-table-div", children=_query_profile_table()),
         html.Div(id="query-profile-details")
     ])
