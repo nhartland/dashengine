@@ -74,7 +74,7 @@ def __normalising_constants(cached_queries: list):
 
 # Dash callbacks #################################################
 
-def _query_profile_summary() -> go.Figure:
+def _query_profile_summary_chart() -> go.Figure:
     """ Generates a set of bar charts for a single query. """
     cached_queries = bigquery.fetch_cached_queries()
     yvals = ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
@@ -189,7 +189,7 @@ def layout() -> html.Div:
                        style={"textAlign": "center", "margin-top": "30px"})
 
     return html.Div(className="container", children=[
-        dcc.Graph(id="query-profile-summary", figure=_query_profile_summary()),
+        dcc.Graph(id="query-profile-summary-chart", figure=_query_profile_summary_chart()),
         html.Div(id="query-profile-table-div", children=_query_profile_table()),
         html.Div(id="query-profile-details")
     ])
