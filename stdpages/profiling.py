@@ -121,21 +121,6 @@ def _query_profile_table() -> dt.DataTable:
                         style_as_list_view=True)
 
 
-@dashapp.callback(
-    Output('query-profile-selected-uuid', 'data'),
-    [Input('query-profile-table', 'derived_virtual_data'),
-     Input('query-profile-table', 'derived_virtual_selected_rows')])
-def _update_selected_uuid(rows, selected_row_indices) -> dcc.Markdown:
-    """ Returns the formatted SQL body of the selected query. """
-    if rows is None or len(selected_row_indices) != 1:
-        return None
-    selected_UUID = rows[selected_row_indices[0]]["UUID"]
-    return selected_UUID
-
-
-@dashapp.callback(
-    Output('query-profile-body', 'children'),
-    [Input('query-profile-selected-uuid', 'data')])
 def _query_profile_body(selected_UUID) -> dcc.Markdown:
     """ Returns the formatted SQL body of the selected query. """
     if selected_UUID is None:  # Handle empty selected UUID
@@ -147,9 +132,6 @@ def _query_profile_body(selected_UUID) -> dcc.Markdown:
     return dcc.Markdown(query_code)
 
 
-@dashapp.callback(
-    Output('query-profile-parameters', 'children'),
-    [Input('query-profile-selected-uuid', 'data')])
 def _query_profile_parameters(selected_UUID):
     """ Returns the parameters of the selected query. """
     if selected_UUID is None:  # Handle empty selected UUID
@@ -173,9 +155,6 @@ def _query_profile_parameters(selected_UUID):
                         })
 
 
-@dashapp.callback(
-    Output('query-profile-preview', 'children'),
-    [Input('query-profile-selected-uuid', 'data')])
 def _query_profile_preview(selected_UUID) -> dt.DataTable:
     """ Returns the formatted SQL body of the selected query. """
     if selected_UUID is None:  # Handle empty selected UUID
@@ -190,23 +169,26 @@ def _query_profile_preview(selected_UUID) -> dt.DataTable:
 
 @dashapp.callback(
     Output('query-profile-details', 'children'),
-    [Input('query-profile-selected-uuid', 'data')])
-def _query_profile_details(selected_UUID) -> list:
+    [Input('query-profile-table', 'derived_virtual_data'),
+     Input('query-profile-table', 'derived_virtual_selected_rows')])
+def _query_profile_details(rows, selected_row_indices) -> list:
     """ Returns the details (SQL and parameters) of the selected query. """
-    if selected_UUID is None:  # Handle empty selected UUID
+    if rows is None or len(selected_row_indices) != 1:
         return [html.H5("Select a query to view details",
                         style={"textAlign": "center", "margin-top": "30px"})]
+    # Determine selected UUID
+    selected_UUID = rows[selected_row_indices[0]]["UUID"]
     return [ html.H3("Query Details",
                      style={"textAlign": "center", "margin-top": "30px"}),
              html.H4("Query Body",
                      style={"textAlign": "left"}),
-             html.Div(id="query-profile-body"),
+             html.Div(children=_query_profile_body(selected_UUID)),
              html.H4("Query Parameters",
                      style={"textAlign": "left"}),
-             html.Div(id="query-profile-parameters"),
+             html.Div(children=_query_profile_parameters(selected_UUID)),
              html.H4("Query Preview",
                      style={"textAlign": "left"}),
-             html.Div(id="query-profile-preview")]
+             html.Div(children=_query_profile_preview(selected_UUID))]
 
 
 # Layout #################################################################
@@ -219,7 +201,6 @@ def layout() -> html.Div:
                        style={"textAlign": "center", "margin-top": "30px"})
 
     return html.Div(className="container", children=[
-        dcc.Store(id='query-profile-selected-uuid', data=None),
         dcc.Graph(id="query-profile-summary-chart", figure=_query_profile_summary_chart()),
         html.Div(id="query-profile-table-div", children=_query_profile_table()),
         html.Div(id="query-profile-details")
