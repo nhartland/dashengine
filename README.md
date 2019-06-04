@@ -38,6 +38,16 @@ SQL queries rather than on the GAE instance. Furthermore this caching, being
 in-instance-memory, is not preserved across instances. This can be easily
 modified for use with, e.g redis.
 
+### Profiler
+
+The profiler can work ok (although maybe not perfectly) even in a multi-threaded
+environment, even with a simple (in-memory) cache. Normally dash would have
+issue with 'global state' in the sense of queries cached in memory in one
+thread, however queries are referenced in the profiler by query ID and
+parameters only, therefore if, in any given thread, the query has not been
+cached, the thread is able to re-run the query to display profiling information.
+
+
 ### Credentials
 
 Are obtained through `google.auth.default`.
