@@ -1,19 +1,14 @@
 import os
 import yaml
 import uuid
+import json
 import logging
 import datetime
 import google.auth
 import pandas as pd
-from tinydb import TinyDB, Query
-from tinydb.storages import MemoryStorage
 from dataclasses import dataclass
 from google.cloud import bigquery
-
-# Create cache table in TinyDB: Note cache_size is set to zero
-# here to disable caching of **TinyDB queries** not BigQuery ones.
-CACHE_DB = TinyDB(storage=MemoryStorage)
-CACHE_TABLE = CACHE_DB.table('dashengine-cache', cache_size=0)
+from dashengine.dashapp import cache
 
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
@@ -110,8 +105,8 @@ def fetch_cached_queries() -> list:
             (list): A list of all cached queries in the form of BigQueryResult objects.
     """
     cached_queries = []
-    for query in CACHE_TABLE:
-        cached_queries.append(query["result"])
+    #for query in CACHE_TABLE:
+    #    cached_queries.append(query["result"])
     return cached_queries
 
 
@@ -144,6 +139,25 @@ def _build_query_parameters(query: BigQuery, parameters: dict) -> list:
     return query_params
 
 
+def _get_query_cache_key(query_id: str, parameters: dict) -> str:
+    """ Generate a cache key for a query_id and a set of parameters. """
+    return "QUERY:"+query_id + ":"+json.dumps(parameters, sort_keys=True)
+
+
+def _add_cached_results(query_id: str, parameters: dict, results: BigQueryResult) -> str:
+    """ Adds a set of query results to the cache. """
+    result_key = _get_query_cache_key(query_id, parameters)
+    uidref_key = "UUID:"+results.uuid
+    cache.set(result_key, results)     # Add query results to cache
+    cache.set(uidref_key, result_key)  # Add UUID to results key dictionary
+
+
+def _get_cached_results(query_id: str, parameters: dict) -> BigQueryResult:
+    """ Returns cached query data. """
+    result_key = _get_query_cache_key(query_id, parameters)
+    return cache.get(result_key)
+
+
 def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     """ Performs a query over BigQuery and returns the result.
 
@@ -162,15 +176,10 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     """
     logger = logging.getLogger(__name__)
     # Check cache for existing result with these parameters
-    BQuery = Query()
-    cache_check = CACHE_TABLE.get((BQuery.query_id == query_id) &
-                                  (BQuery.parameters == parameters))
-    # Returned cached value if present
-    if cache_check and cache_check["result"]:
-        result = cache_check["result"]
-        params = cache_check["parameters"]
-        logger.debug(f"Local cache hit: {query_id} {params}")
-        return result
+    cache_check = _get_cached_results(query_id, parameters)
+    if cache_check:
+        logger.debug(f"Local cache hit: {query_id}")
+        return cache_check
 
     # Setup BigQuery client
     client = bigquery.Client()
@@ -196,10 +205,6 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
                          query_result.total_bytes_processed)
 
     # Insert result in cache
-    # Note upsert is used here to ensure no duplicates are added due to multiple thread execution
-    CACHE_TABLE.upsert({'query_id': bqr.source.query_id,
-                        'parameters': bqr.parameters,
-                        'result': bqr},
-                       (BQuery.query_id == query_id) & (BQuery.parameters == parameters))
+    _add_cached_results(query_id, parameters, bqr)
     logger.debug(f"New cache entry: {bqr.uuid} {query_id} {parameters}")
     return bqr
