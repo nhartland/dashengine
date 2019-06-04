@@ -144,7 +144,7 @@ def _build_query_parameters(query: BigQuery, parameters: dict) -> list:
     return query_params
 
 
-def _register_query(query_id: str, parameters: dict, query_uuid: str):
+def _register_query(query_id: str, parameters: dict):
     """ Add a query and it's parameters to the query registry.
 
         Note that this is not thread-safe: The registry is meant
@@ -155,9 +155,8 @@ def _register_query(query_id: str, parameters: dict, query_uuid: str):
     registry = cache.get("query-registry")
     if registry is None:
         registry = {}
-    registry[registry_key] = { "query_id": query_id,
-                               "parameters": parameters,
-                               "uuid": query_uuid}
+    registry[registry_key] = {"query_id": query_id,
+                              "parameters": parameters}
     cache.set("query-registry", registry)
 
 
@@ -191,12 +190,11 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     query_result = client.query(query.body, job_config=job_config)
     query_data = query_result.to_dataframe()
 
-    # Generate UUID and register the query in the cache (for the profiler)
-    query_uuid = str(uuid.uuid4())
-    _register_query(query_id, parameters, query_uuid)
+    # Register the query in the cache (for the profiler)
+    _register_query(query_id, parameters)
 
     # Form up results class
-    return BigQueryResult(query_uuid,
+    return BigQueryResult(str(uuid.uuid4()),
                           query,
                           parameters,
                           query_data,
