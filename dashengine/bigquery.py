@@ -104,9 +104,14 @@ def fetch_cached_queries() -> list:
         Returns:
             (list): A list of all cached queries in the form of BigQueryResult objects.
     """
+    # Fetch registry of queries
+    registry = cache.get("query-registry")
+    if registry is None:
+        return []
     cached_queries = []
-    #for query in CACHE_TABLE:
-    #    cached_queries.append(query["result"])
+    for query in registry.values():
+        result = run_query(query["query_id"], query["parameters"])
+        cached_queries.append(result)
     return cached_queries
 
 
@@ -139,25 +144,24 @@ def _build_query_parameters(query: BigQuery, parameters: dict) -> list:
     return query_params
 
 
-def _get_query_cache_key(query_id: str, parameters: dict) -> str:
-    """ Generate a cache key for a query_id and a set of parameters. """
-    return "QUERY:"+query_id + ":"+json.dumps(parameters, sort_keys=True)
+def _register_query(query_id: str, parameters: dict, query_uuid: str):
+    """ Add a query and it's parameters to the query registry.
+
+        Note that this is not thread-safe: The registry is meant
+        for debug purposes and therefore should normally only be
+        run in a single-threaded debug server.
+    """
+    registry_key = query_id + ":" + json.dumps(parameters, sort_keys=True)
+    registry = cache.get("query-registry")
+    if registry is None:
+        registry = {}
+    registry[registry_key] = { "query_id": query_id,
+                               "parameters": parameters,
+                               "uuid": query_uuid}
+    cache.set("query-registry", registry)
 
 
-def _add_cached_results(query_id: str, parameters: dict, results: BigQueryResult) -> str:
-    """ Adds a set of query results to the cache. """
-    result_key = _get_query_cache_key(query_id, parameters)
-    uidref_key = "UUID:"+results.uuid
-    cache.set(result_key, results)     # Add query results to cache
-    cache.set(uidref_key, result_key)  # Add UUID to results key dictionary
-
-
-def _get_cached_results(query_id: str, parameters: dict) -> BigQueryResult:
-    """ Returns cached query data. """
-    result_key = _get_query_cache_key(query_id, parameters)
-    return cache.get(result_key)
-
-
+@cache.memoize(timeout=300)
 def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     """ Performs a query over BigQuery and returns the result.
 
@@ -174,13 +178,6 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     Returns:
         (BigQueryResult): The results of the query.
     """
-    logger = logging.getLogger(__name__)
-    # Check cache for existing result with these parameters
-    cache_check = _get_cached_results(query_id, parameters)
-    if cache_check:
-        logger.debug(f"Local cache hit: {query_id}")
-        return cache_check
-
     # Setup BigQuery client
     client = bigquery.Client()
     # Read query
@@ -194,17 +191,16 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     query_result = client.query(query.body, job_config=job_config)
     query_data = query_result.to_dataframe()
 
-    # Form up results class
-    bqr = BigQueryResult(str(uuid.uuid4()),
-                         query,
-                         parameters,
-                         query_data,
-                         query_result.ended,
-                         (query_result.ended - query_result.started).microseconds / 1.E6,
-                         query_result.total_bytes_billed,
-                         query_result.total_bytes_processed)
+    # Generate UUID and register the query in the cache (for the profiler)
+    query_uuid = str(uuid.uuid4())
+    _register_query(query_id, parameters, query_uuid)
 
-    # Insert result in cache
-    _add_cached_results(query_id, parameters, bqr)
-    logger.debug(f"New cache entry: {bqr.uuid} {query_id} {parameters}")
-    return bqr
+    # Form up results class
+    return BigQueryResult(query_uuid,
+                          query,
+                          parameters,
+                          query_data,
+                          query_result.ended,
+                          (query_result.ended - query_result.started).microseconds / 1.E6,
+                          query_result.total_bytes_billed,
+                          query_result.total_bytes_processed)

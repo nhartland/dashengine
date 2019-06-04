@@ -31,15 +31,12 @@ principle features:
 
 ### Query caching
 Query results are cached in memory via
-[TinyDB](https://tinydb.readthedocs.io/en/latest/). Note that this means the
+[flask-caching](https://flask-caching.readthedocs.io/). Note that this means the
 developer must be careful about memory usage to fit into GAE standard memory
 limits. The general principle being that any heavy-lifting should be done in the
 SQL queries rather than on the GAE instance. Furthermore this caching, being
-in-memory through TinyDB, is not preserved across instances.
-
-To keep memory usage down, caching is performed only at the level of BigQuery
-results. To allow for the straightforward filtering of results in the cache in
-the case of parametrised queries, TinyDB is used rather than Flask caching.
+in-instance-memory, is not preserved across instances. This can be easily
+modified for use with, e.g redis.
 
 ### Credentials
 
@@ -58,3 +55,4 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 4. Make navigation button conditional on having > 1 page
 5. Add loading states
 6. Final documentation, quickstart, skeleton page, etc
+7. Hand-trimmed requirements.txt
