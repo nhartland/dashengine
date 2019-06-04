@@ -56,3 +56,4 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 5. Add loading states
 6. Final documentation, quickstart, skeleton page, etc
 7. Hand-trimmed requirements.txt
+8. Write some documentation on how the query registry works etc

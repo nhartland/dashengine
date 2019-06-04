@@ -1,4 +1,5 @@
 """ Page for the monitoring of query performance characteristics. """
+import json
 # Plotly
 import plotly.graph_objs as go
 # Dash
@@ -99,12 +100,14 @@ def _query_profile_table() -> dt.DataTable:
     # Setup all data for the table
     data = [{"ID": query.source.query_id,
              "UUID": query.uuid,
+             "Parameters": json.dumps(query.parameters),
              "Duration": query.duration,
              "Memory Usage": query.memory_usage(),
              "Bytes Processed": query.bytes_processed,
              "Bytes Billed": query.bytes_billed} for query in cached_queries]
+    hd = {"Parameters": True}  # Hidden data columns
     # Build list of columns from the data keys
-    columns = [ {"name": i, "id": i} for i in data[0]]
+    columns = [ {"name": i, "id": i, "hidden": hd.get(i, False)} for i in data[0]]
     # Build datatable
     return dt.DataTable(id='query-profile-table', columns=columns, data=data,
                         sorting=True, sorting_type="single", row_selectable="single",
@@ -121,22 +124,15 @@ def _query_profile_table() -> dt.DataTable:
                         style_as_list_view=True)
 
 
-def _query_profile_body(selected_UUID) -> dcc.Markdown:
+def _query_profile_body(selected_query) -> dcc.Markdown:
     """ Returns the formatted SQL body of the selected query. """
-    if selected_UUID is None:  # Handle empty selected UUID
-        return dcc.Markdown()
-    selected_query = __fetch_query_from_uuid(selected_UUID)
-
     # Build query body in markdown code block
     query_code = " ``` \n " + selected_query.source.body + " \n ```"
     return dcc.Markdown(query_code)
 
 
-def _query_profile_parameters(selected_UUID):
+def _query_profile_parameters(selected_query):
     """ Returns the parameters of the selected query. """
-    if selected_UUID is None:  # Handle empty selected UUID
-        return dcc.Markdown()
-    selected_query = __fetch_query_from_uuid(selected_UUID)
     parameters = selected_query.parameters
     if len(parameters) == 0:
         return html.H6("No parameters")
@@ -155,11 +151,8 @@ def _query_profile_parameters(selected_UUID):
                         })
 
 
-def _query_profile_preview(selected_UUID) -> dt.DataTable:
+def _query_profile_preview(selected_query) -> dt.DataTable:
     """ Returns the formatted SQL body of the selected query. """
-    if selected_UUID is None:  # Handle empty selected UUID
-        return dcc.Markdown()
-    selected_query = __fetch_query_from_uuid(selected_UUID)
     df = selected_query.result.head()
     return dt.DataTable( id='query-profile-preview-table',
                          columns=[{"name": i, "id": i} for i in df.columns],
@@ -177,18 +170,20 @@ def _query_profile_details(rows, selected_row_indices) -> list:
         return [html.H5("Select a query to view details",
                         style={"textAlign": "center", "margin-top": "30px"})]
     # Determine selected UUID
-    selected_UUID = rows[selected_row_indices[0]]["UUID"]
+    selected_queryID = rows[selected_row_indices[0]]["ID"]
+    selected_params  = json.loads(rows[selected_row_indices[0]]["Parameters"])
+    selected_query = bigquery.run_query(selected_queryID, selected_params)
     return [ html.H3("Query Details",
                      style={"textAlign": "center", "margin-top": "30px"}),
              html.H4("Query Body",
                      style={"textAlign": "left"}),
-             html.Div(children=_query_profile_body(selected_UUID)),
+             html.Div(children=_query_profile_body(selected_query)),
              html.H4("Query Parameters",
                      style={"textAlign": "left"}),
-             html.Div(children=_query_profile_parameters(selected_UUID)),
+             html.Div(children=_query_profile_parameters(selected_query)),
              html.H4("Query Preview",
                      style={"textAlign": "left"}),
-             html.Div(children=_query_profile_preview(selected_UUID))]
+             html.Div(children=_query_profile_preview(selected_query))]
 
 
 # Layout #################################################################
