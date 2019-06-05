@@ -15,12 +15,14 @@ LINKNAME = "Met Demo"
 TITLE = "Demonstration on Met Data"
 
 
-def available_departments() -> list:
+def __available_departments() -> list:
     """ Returns a list of all departments in the dataset. """
     return bigquery.run_query("met-objects-by-department").result.department.tolist()
 
 
-def items_by_department() -> go.Figure:
+@dashapp.callback(Output('met-items-by-department', 'figure'),
+                  [Input('none', 'children')])
+def items_by_department(_) -> go.Figure:
     """ Returns a Graph displaying items per department for the Met."""
     query_data = bigquery.run_query("met-objects-by-department").result
     bar = go.Bar( x=query_data["department"],
@@ -43,7 +45,7 @@ def items_by_date(selected_department: str) -> go.Figure:
     if selected_department is None:
         # Use list of all departments
         parameters = {"creation_date": min_creation_date,
-                      "departments": available_departments()}
+                      "departments": __available_departments()}
         query_data = bigquery.run_query("met-object-creationdate",
                                         parameters
                                         ).result
@@ -72,17 +74,18 @@ def items_by_date(selected_department: str) -> go.Figure:
     return go.Figure(data=[hist], layout=layout)
 
 
-def department_dropdown():
+@dashapp.callback(Output('met-dropdown-filter', 'options'),
+                  [Input('none', 'children')])
+def department_dropdown(_):
     # Dropdown options
-    departments = available_departments()
-    return dcc.Dropdown( id="met-dropdown-filter",
-                         value=None,
-                         options=[ {'label': dp, 'value': dp} for dp in departments],
-                         placeholder="Filter by department")
+    departments = __available_departments()
+    return [{'label': dp, 'value': dp} for dp in departments]
 
 
 def layout() -> html.Div:
     return html.Div(className="container", children=[
-        dcc.Graph( figure=items_by_department()),
+        # Begin with empty Div: Kicks off callbacks
+        html.Div(id='none', children=[], style={'display': 'none'}),
+        dcc.Graph(id="met-items-by-department"),
         dcc.Graph(id="met-items-by-date"),
-        department_dropdown()])
+        dcc.Dropdown(id="met-dropdown-filter", value=None, placeholder="Filter by department")])
