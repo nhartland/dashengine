@@ -58,12 +58,9 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 
 ### TODO
 
-1. Fix the met-demo callback not running at start (may be that the callback is
-   attached before a layout?, see the exception suppression in dashapp)
-2. 'Refresh' data button
-3. Add 'production mode' which disables profiler
-4. Make navigation button conditional on having > 1 page
-5. Add loading states
-6. Final documentation, quickstart, skeleton page, etc
-7. Hand-trimmed requirements.txt
-8. Write some documentation on how the query registry works etc
+1. 'Refresh' data button
+2. Add 'production mode' which disables profiler
+3. Make navigation button conditional on having > 1 page
+4. Add loading states
+5. Final documentation, quickstart, skeleton page, etc
+6. Write some documentation on how the query registry works etc

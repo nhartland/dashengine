@@ -55,8 +55,9 @@ def items_by_date(selected_department: str) -> go.Figure:
                                         parameters
                                         ).result
 
-    # Also have the option to query on all departments and filter in pandas. e.g:
+    # You also have the option to query on all departments and filter in pandas. e.g:
     # query_data = query_data[ query_data["department"] == selected_department]
+    # This can be faster than re-querying but requires more RAM
 
     hist = go.Histogram( x=query_data["object_begin_date"],
                          xbins=dict(
@@ -75,6 +76,7 @@ def department_dropdown():
     # Dropdown options
     departments = available_departments()
     return dcc.Dropdown( id="met-dropdown-filter",
+                         value=None,
                          options=[ {'label': dp, 'value': dp} for dp in departments],
                          placeholder="Filter by department")
 
