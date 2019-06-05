@@ -1,18 +1,22 @@
 import os
-import yaml
 import uuid
 import json
 import logging
 import datetime
 import google.auth
 import pandas as pd
+from ruamel.yaml import YAML
 from dataclasses import dataclass
 from google.cloud import bigquery
 from dashengine.dashapp import cache
 
+# BigQuery
 DIALECT = "standard"
 QUERY_DATA_DIRECTORY = "queries"
 CREDENTIALS, PROJECT_ID = google.auth.default()
+
+# YAML parser
+yaml = YAML(typ="safe")
 
 
 @dataclass(frozen=True)
@@ -83,7 +87,7 @@ def _load_query(query_id: str) -> BigQuery:
 
     with open(target_queryfile, 'r') as infile:
         try:
-            qdata = yaml.safe_load(infile)
+            qdata = yaml.load(infile)
             # Build query object
             query_object = BigQuery(query_id,
                                     qdata["name"],
