@@ -86,6 +86,6 @@ def layout() -> html.Div:
     return html.Div(className="container", children=[
         # Begin with empty Div: Kicks off callbacks
         html.Div(id='none', children=[], style={'display': 'none'}),
-        dcc.Graph(id="met-items-by-department"),
-        dcc.Graph(id="met-items-by-date"),
+        dcc.Loading(id="met-loading-1", children=[dcc.Graph(id="met-items-by-department")], type="graph"),
+        dcc.Loading(id="met-loading-2", children=[dcc.Graph(id="met-items-by-date")], type="graph"),
         dcc.Dropdown(id="met-dropdown-filter", value=None, placeholder="Filter by department")])
