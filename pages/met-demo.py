@@ -11,8 +11,6 @@ import dashengine.bigquery as bigquery
 ROUTE = "/met-demo"
 # Name used when linking (for example in the navigation bar)
 LINKNAME = "Met Demo"
-# Title for rendering in the navbar
-TITLE = "Demonstration on Met Data"
 
 
 def __available_departments() -> list:
@@ -86,6 +84,8 @@ def layout() -> list:
     return [
         # Begin with empty Div: Kicks off callbacks
         html.Div(id='met-trigger', children=[], style={'display': 'none'}),
+        html.H3("Metropolitain Museum of Art",
+                style={"textAlign": "center", "margin-top": "30px"}),
         dcc.Loading(id="met-loading",  children=[
             dcc.Graph(id="met-items-by-department"),
             dcc.Graph(id="met-items-by-date"),

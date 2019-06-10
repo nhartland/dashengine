@@ -15,8 +15,6 @@ import dashengine.bigquery as bigquery
 ROUTE = "/profile"
 # Name used when linking, for example in the navigation bar
 LINKNAME = "Profiling"
-# Title for rendering in the navbar
-TITLE = "Cached Query Profiler"
 
 
 # Helper functions #################################################
@@ -202,6 +200,8 @@ def layout() -> list:
                        style={"textAlign": "center", "margin-top": "30px"})
 
     return [
+        html.H3("Cached Query Profiler",
+                style={"textAlign": "center", "margin-top": "30px"}),
         dcc.Loading(id="query-profile-loading", children=[
             html.Div(id='profile-trigger', children=[], style={'display': 'none'}),
             dcc.Graph(id="query-profile-summary-chart"),

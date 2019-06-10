@@ -6,8 +6,6 @@ import dash_html_components as html
 ROUTE = "/"
 # Name used when linking (for example in the navigation bar)
 LINKNAME = "Landing"
-# Title for rendering in the navbar
-TITLE = "DashEngine Demonstration"
 
 with open('README.md', 'r') as readme_file:
     README = readme_file.read()
