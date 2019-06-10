@@ -31,18 +31,18 @@ def navigation_bar(pathname) -> dbc.NavbarSimple:
                                       href=mod.ROUTE,
                                       active=(pathname == mod.ROUTE))
                  for mod in ALL_PAGES.values()]
-    return dbc.NavbarSimple(children=[
-                            # Uncomment to display the project ID in the NavBar
-                            #  dbc.NavbarBrand(f"{bigquery.PROJECT_ID}"),
-                            dbc.DropdownMenu(
-                                nav=True,
-                                in_navbar=True,
-                                label="Navigation",
-                                children=menu_opts)],
+    nbc = []
+    # Add navigation when the number of pages is > 1
+    if len(ALL_PAGES) > 1:
+        nbc.append(dbc.DropdownMenu(nav=True,
+                                    in_navbar=True,
+                                    label="Navigation",
+                                    children=menu_opts))
+
+    return dbc.NavbarSimple(children=nbc,
                             brand=f"{ALL_PAGES[pathname].TITLE}",
                             brand_href="/",
-                            sticky="top",
-                            )
+                            sticky="top")
 
 
 @dashapp.callback(Output('page-content', 'children'),
