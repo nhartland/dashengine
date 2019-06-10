@@ -13,9 +13,9 @@ with open('README.md', 'r') as readme_file:
     README = readme_file.read()
 
 
-def layout() -> html.Div:
-    return html.Div(className="container", children=[
+def layout() -> list:
+    return [
         html.Div([
             dcc.Markdown(README)
         ])
-    ])
+    ]

@@ -5,3 +5,4 @@ PyYAML~=5.1
 ruamel.yaml~=0.15.96
 google-cloud-bigquery~=1.12.1
 pandas~=0.24.2
+redis~=3.2.1

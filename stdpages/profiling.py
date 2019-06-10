@@ -188,16 +188,16 @@ def _query_profile_details(rows, selected_row_indices) -> list:
 
 # Layout #################################################################
 
-def layout() -> html.Div:
+def layout() -> list:
     """ Generates the layout for the query profiling page. """
     # No queries cached
     if len(bigquery.fetch_cached_queries()) == 0:
         return html.H4("No queries in cache",
                        style={"textAlign": "center", "margin-top": "30px"})
 
-    return html.Div(className="container", children=[
+    return [
         dcc.Graph(id="query-profile-summary-chart", figure=_query_profile_summary_chart()),
         html.Div(id="query-profile-table-div", children=_query_profile_table()),
         dcc.Loading(id="met-loading", children=[
             html.Div(id="query-profile-details")])
-    ])
+    ]

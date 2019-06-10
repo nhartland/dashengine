@@ -58,6 +58,6 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 
 ### TODO
 
-1. 'Refresh' data button
+1. Setup app configuration, for NavBar title + caching
 2. Final documentation, quickstart, skeleton page, etc
 3. Write some documentation on how the query registry works etc

@@ -6,7 +6,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 # Local project
-from dashengine.dashapp import dashapp
+from dashengine.dashapp import dashapp, cache
 import dashengine.pageloader as pageloader
 
 
@@ -19,38 +19,45 @@ app = dashapp.server
 # Read page modules
 ALL_PAGES = pageloader.page_loader(["pages", "stdpages"])
 
+# Application Name
+APP_NAME = "DashEngine"
+
 dashapp.layout = html.Div([
-    dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content')
+    dcc.Location(id='url', refresh=False),   # URL Storage
+    dcc.Store(id='refresh-status', data=0),  # Refresh status storage
+    dbc.NavbarSimple(children=[
+        dbc.DropdownMenu(id='global-navigation', nav=True, in_navbar=True, label="Navigation"),
+        dbc.NavLink('Refresh', id='refresh-button', n_clicks=0, href='#')],
+        sticky="top", brand=APP_NAME, brand_href='/'),
+    html.Div(className='container', id='page-content')
 ])
 
 
-def navigation_bar(pathname) -> dbc.NavbarSimple:
-    """ Builds the navigation bar for the dashboards. """
-    menu_opts = [dbc.DropdownMenuItem(mod.LINKNAME,
-                                      href=mod.ROUTE,
-                                      active=(pathname == mod.ROUTE))
-                 for mod in ALL_PAGES.values()]
-    nbc = []
-    # Add navigation when the number of pages is > 1
-    if len(ALL_PAGES) > 1:
-        nbc.append(dbc.DropdownMenu(nav=True,
-                                    in_navbar=True,
-                                    label="Navigation",
-                                    children=menu_opts))
-
-    return dbc.NavbarSimple(children=nbc,
-                            brand=f"{ALL_PAGES[pathname].TITLE}",
-                            brand_href="/",
-                            sticky="top")
-
-
-@dashapp.callback(Output('page-content', 'children'),
+@dashapp.callback(Output('global-navigation', 'children'),
                   [Input('url', 'pathname')])
-def display_page(pathname: str) -> html.Div:
+def navigation_dropdown(pathname) -> list:
+    """ Builds the navigation dropdown for the dashboards. """
+    return [dbc.DropdownMenuItem(mod.LINKNAME,
+                                 href=mod.ROUTE,
+                                 active=(pathname == mod.ROUTE))
+            for mod in ALL_PAGES.values()]
+
+
+@dashapp.callback(Output('refresh-status', 'data'),
+                  [Input('refresh-button', 'n_clicks')])
+def refresh_cache(num_clicks):
+    with app.app_context():
+        cache.clear()
+    return num_clicks
+
+
+# Updates either on change of URL or change of refresh-status
+@dashapp.callback(Output('page-content', 'children'),
+                  [Input('url', 'pathname'),
+                   Input('refresh-status', 'data')])
+def display_page(pathname: str, _) -> list:
     if pathname in ALL_PAGES:
-        return [ navigation_bar(pathname),
-                 ALL_PAGES[pathname].layout()]
+        return ALL_PAGES[pathname].layout()
     else:
         return '404'
 

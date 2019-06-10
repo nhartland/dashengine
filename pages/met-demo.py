@@ -82,12 +82,12 @@ def department_dropdown(_):
     return [{'label': dp, 'value': dp} for dp in departments]
 
 
-def layout() -> html.Div:
-    return html.Div(className="container", children=[
+def layout() -> list:
+    return [
         # Begin with empty Div: Kicks off callbacks
         html.Div(id='none', children=[], style={'display': 'none'}),
         dcc.Loading(id="met-loading",  children=[
             dcc.Graph(id="met-items-by-department"),
             dcc.Graph(id="met-items-by-date"),
             dcc.Dropdown(id="met-dropdown-filter", value=None, placeholder="Filter by department")
-        ], type="graph", fullscreen=True)])
+        ], type="graph", fullscreen=True)]
