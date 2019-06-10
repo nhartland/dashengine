@@ -21,7 +21,7 @@ def __available_departments() -> list:
 
 
 @dashapp.callback(Output('met-items-by-department', 'figure'),
-                  [Input('none', 'children')])
+                  [Input('met-trigger', 'children')])
 def items_by_department(_) -> go.Figure:
     """ Returns a Graph displaying items per department for the Met."""
     query_data = bigquery.run_query("met-objects-by-department").result
@@ -75,7 +75,7 @@ def items_by_date(selected_department: str) -> go.Figure:
 
 
 @dashapp.callback(Output('met-dropdown-filter', 'options'),
-                  [Input('none', 'children')])
+                  [Input('met-trigger', 'children')])
 def department_dropdown(_):
     # Dropdown options
     departments = __available_departments()
@@ -85,7 +85,7 @@ def department_dropdown(_):
 def layout() -> list:
     return [
         # Begin with empty Div: Kicks off callbacks
-        html.Div(id='none', children=[], style={'display': 'none'}),
+        html.Div(id='met-trigger', children=[], style={'display': 'none'}),
         dcc.Loading(id="met-loading",  children=[
             dcc.Graph(id="met-items-by-department"),
             dcc.Graph(id="met-items-by-date"),

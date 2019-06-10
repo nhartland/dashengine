@@ -76,7 +76,10 @@ def __normalising_constants(cached_queries: list):
 
 # Dash callbacks #################################################
 
-def _query_profile_summary_chart() -> go.Figure:
+@dashapp.callback(
+    Output('query-profile-summary-chart', 'figure'),
+    [Input('profile-trigger', 'children')])
+def _query_profile_summary_chart(_) -> go.Figure:
     """ Generates a set of bar charts for a single query. """
     cached_queries = bigquery.fetch_cached_queries()
     yvals = ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
@@ -94,7 +97,10 @@ def _query_profile_summary_chart() -> go.Figure:
     return go.Figure(data=bar_charts, layout=layout)
 
 
-def _query_profile_table() -> dt.DataTable:
+@dashapp.callback(
+    Output('query-profile-table-div', 'children'),
+    [Input('profile-trigger', 'children')])
+def _query_profile_table(_) -> dt.DataTable:
     """ Generates a table profiling all cached queries. """
     cached_queries = bigquery.fetch_cached_queries()
     # Setup all data for the table
@@ -191,13 +197,16 @@ def _query_profile_details(rows, selected_row_indices) -> list:
 def layout() -> list:
     """ Generates the layout for the query profiling page. """
     # No queries cached
-    if len(bigquery.fetch_cached_queries()) == 0:
+    if bigquery.fetch_num_cached_queries() == 0:
         return html.H4("No queries in cache",
                        style={"textAlign": "center", "margin-top": "30px"})
 
     return [
-        dcc.Graph(id="query-profile-summary-chart", figure=_query_profile_summary_chart()),
-        html.Div(id="query-profile-table-div", children=_query_profile_table()),
-        dcc.Loading(id="met-loading", children=[
+        dcc.Loading(id="query-profile-loading", children=[
+            html.Div(id='profile-trigger', children=[], style={'display': 'none'}),
+            dcc.Graph(id="query-profile-summary-chart"),
+            ], type="graph", fullscreen=True),
+        html.Div(id="query-profile-table-div"),
+        dcc.Loading(id="query-details-loading", children=[
             html.Div(id="query-profile-details")])
     ]

@@ -102,6 +102,19 @@ def _load_query(query_id: str) -> BigQuery:
             raise exc
 
 
+def fetch_num_cached_queries() -> int:
+    """ Lists all cached queries.
+
+        Returns:
+            (list): A list of all cached queries in the form of BigQueryResult objects.
+    """
+    # Fetch registry of queries
+    registry = cache.get("query-registry")
+    if registry is None:
+        return 0
+    return len(registry)
+
+
 def fetch_cached_queries() -> list:
     """ Lists all cached queries.
 
