@@ -198,5 +198,6 @@ def layout() -> html.Div:
     return html.Div(className="container", children=[
         dcc.Graph(id="query-profile-summary-chart", figure=_query_profile_summary_chart()),
         html.Div(id="query-profile-table-div", children=_query_profile_table()),
-        html.Div(id="query-profile-details")
+        dcc.Loading(id="met-loading", children=[
+            html.Div(id="query-profile-details")])
     ])

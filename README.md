@@ -61,6 +61,5 @@ here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 1. 'Refresh' data button
 2. Add 'production mode' which disables profiler
 3. Make navigation button conditional on having > 1 page
-4. Add loading states
-5. Final documentation, quickstart, skeleton page, etc
-6. Write some documentation on how the query registry works etc
+4. Final documentation, quickstart, skeleton page, etc
+5. Write some documentation on how the query registry works etc
