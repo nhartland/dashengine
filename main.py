@@ -62,5 +62,11 @@ def display_page(pathname: str, _) -> list:
         return '404'
 
 
+# GAE warmup request handler
+@app.route('/_ah/warmup')
+def warmup():
+    return '', 200, {}
+
+
 if __name__ == '__main__':
     dashapp.run_server(debug=True)
