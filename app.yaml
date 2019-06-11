@@ -3,9 +3,3 @@ instance_class: B4
 basic_scaling:
   max_instances: 1
   idle_timeout: 2m
-
- # Warmup service usually a good idea
-inbound_services:
-- warmup
-
-env_variables:
