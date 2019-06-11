@@ -1,17 +1,23 @@
 """ Principle dash app module """
 import dash
+from ruamel.yaml import YAML
 import dash_bootstrap_components as dbc
 from flask_caching import Cache
 
+# YAML parser
+yaml = YAML(typ="safe")
+
+# Configuration
+CONFIG_PATH = "config.yaml"
+# Setup cache
+with open(CONFIG_PATH, 'r') as infile:
+    CONFIGURATION = yaml.load(infile)
+
 # Setup dash application
 dashapp = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+dashapp.config.suppress_callback_exceptions = True  # Required as multi-page
+dashapp.title = CONFIGURATION["APP_NAME"]
 
-# Required by multi-page dash apps
-dashapp.config.suppress_callback_exceptions = True
+# Setup cache according to configuration
+cache = Cache(dashapp.server, config=CONFIGURATION["cache-config"])
 
-# Setup cache
-cache = Cache(dashapp.server, config={
-    'CACHE_TYPE': 'simple'
-  # 'CACHE_TYPE': 'redis',
-  # 'CACHE_REDIS_URL': os.environ.get('REDIS_URL', '')
-})

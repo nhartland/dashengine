@@ -1,0 +1,12 @@
+# Name to run in NavBar
+APP_NAME: 'DashEngine'
+
+# Configuration for flask-caching
+# See documentation at
+# https://pythonhosted.org/Flask-Caching/#configuring-flask-caching
+cache-config:
+    CACHE_TYPE: 'redis'
+    CACHE_KEY_PREFIX: 'dashengine-cache'
+    CACHE_REDIS_HOST: '<REDIS-HOST-ADDRESS>'
+    CACHE_REDIS_PORT: '<REDIS-HOST-PORT>'
+    CACHE_REDIS_PASSWORD: '<REDIS-PASSWORD>'

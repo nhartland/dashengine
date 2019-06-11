@@ -7,6 +7,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 # Local project
 from dashengine.dashapp import dashapp, cache
+from dashengine.dashapp import CONFIGURATION
 import dashengine.pageloader as pageloader
 
 
@@ -20,7 +21,8 @@ app = dashapp.server
 ALL_PAGES = pageloader.page_loader(["pages", "stdpages"])
 
 # Application Name
-APP_NAME = "DashEngine"
+APP_NAME = CONFIGURATION["APP_NAME"]
+
 
 dashapp.layout = html.Div([
     dcc.Location(id='url', refresh=False),   # URL Storage
