@@ -184,7 +184,7 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     This function reads a query from file, according to the provided id, and
     executes it in Google BigQuery. The result is returned as a
     `BigQueryResult`. The query id specifies the filename of the query under
-    the `bqueries` subfolder. If the query has parameters, these may be passed
+    the `queries` subfolder. If the query has parameters, these may be passed
     as elements of a dictionary via the `parameters` argument.
 
     Args:
