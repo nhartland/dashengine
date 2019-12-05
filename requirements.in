@@ -1,0 +1,7 @@
+dash
+dash-bootstrap-components
+flask-caching
+ruamel.yaml
+google-cloud-bigquery
+pandas
+redis
