@@ -56,6 +56,22 @@ For how to set these credentials when working locally with a project, [see the
 documentation
 here](https://google-auth.readthedocs.io/en/latest/reference/google.auth.html).
 
+## Dockerfile
+
+This project can be deployed with `docker`. An example Dockerfile is provided. To build the container image:
+
+```shell
+docker build . -t dashengine
+```
+
+and to run the container for local testing:
+```
+docker run -p 8050:8050 -v "/Users/<username>/.config:/root/.config" dashengine
+```
+
+where the path `/Users/<username>/.config` points to the config directory used
+by Google's default authentication credentials.
+
 ### TODO
 
 1. Final documentation, quickstart, skeleton page, etc

@@ -65,4 +65,4 @@ def display_page(pathname: str, _) -> list:
 
 
 if __name__ == '__main__':
-    dashapp.run_server(debug=True)
+    dashapp.run_server(host="0.0.0.0", debug=True)
