@@ -64,7 +64,9 @@ This project can be deployed with `docker`. An example Dockerfile is provided. T
 docker build . -t dashengine
 ```
 
-and to run the container for local testing:
+Which can take some time (in building the various
+python dependencies). To run the container for local testing:
+
 ```
 docker run -p 8050:8050 -v "/Users/<username>/.config:/root/.config" dashengine
 ```
