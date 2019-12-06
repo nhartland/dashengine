@@ -1,8 +1,6 @@
 FROM python:3.7 
 
-#RUN apk update
-#RUN apk add make automake gcc g++ python3-dev cython
-
+# Copy over requirements and install them
 COPY requirements.txt /
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
@@ -12,5 +10,3 @@ WORKDIR /app
 EXPOSE 8050
 
 CMD ["gunicorn","--worker-tmp-dir=/dev/shm", "--workers=2", "--threads=4", "--worker-class=gthread", "main:app"]
-
-#CMD ["python", "main.py"]
