@@ -1,8 +1,9 @@
 """ Principle dash app module """
+import os
 import dash
 from ruamel.yaml import YAML
-import dash_bootstrap_components as dbc
 from flask_caching import Cache
+import dash_bootstrap_components as dbc
 
 # YAML parser
 yaml = YAML(typ="safe")
@@ -17,6 +18,9 @@ with open(CONFIG_PATH, 'r') as infile:
 dashapp = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 dashapp.config.suppress_callback_exceptions = True  # Required as multi-page
 dashapp.title = CONFIGURATION["APP_NAME"]
+
+# Setup server secret key for CSRF protection
+dashapp.server.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
 
 # Setup cache according to configuration
 cache = Cache(dashapp.server, config=CONFIGURATION["cache-config"])

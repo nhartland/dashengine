@@ -11,4 +11,6 @@ WORKDIR /app
 
 EXPOSE 8050
 
-CMD ["python", "main.py"]
+CMD ["gunicorn", "--worker-tmp-dir /dev/shm", "--workers=2", "--threads=4", "--worker-class=gthread", "--log-file=-", "-b 0.0.0.0:8050", "main:app"]
+
+#CMD ["python", "main.py"]

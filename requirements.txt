@@ -24,6 +24,7 @@ google-cloud-bigquery==1.22.0
 google-cloud-core==1.0.3  # via google-cloud-bigquery
 google-resumable-media==0.5.0  # via google-cloud-bigquery
 googleapis-common-protos==1.6.0  # via google-api-core
+gunicorn==20.0.4
 idna==2.8                 # via requests
 itsdangerous==1.1.0       # via flask
 jinja2==2.10.3            # via flask
