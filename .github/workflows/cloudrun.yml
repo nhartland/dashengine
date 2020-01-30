@@ -19,18 +19,18 @@ jobs:
          service_account_key: ${{ secrets.GCLOUD_AUTH }}
     # Build the Docker image
      - name: Build
-       run: |        
-         gcloud builds submit \\
-            --project ${{ secrets.GCLOUD_PROJECT }} \\
-            --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }} \\
+       run: >
+         gcloud builds submit
+            --project ${{ secrets.GCLOUD_PROJECT }}
+            --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
             .
     # Deploy to Cloud Run
      - name: Deploy
-       run: |
-         gcloud run deploy ${{ secrets.GCLOUD_APP_NAME }} \\
-         --quiet \\
-         --platform managed \\
-         --allow-unauthenticated \\
-         --region europe-west1 \\
-         --project ${{ secrets.GCLOUD_PROJECT }} \\
+       run: >
+         gcloud run deploy ${{ secrets.GCLOUD_APP_NAME }} 
+         --quiet 
+         --platform managed 
+         --allow-unauthenticated 
+         --region europe-west1 
+         --project ${{ secrets.GCLOUD_PROJECT }} 
          --image eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
