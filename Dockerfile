@@ -9,4 +9,4 @@ WORKDIR /app
 
 EXPOSE 8050
 
-CMD ["gunicorn","--worker-tmp-dir=/dev/shm", "--workers=2", "--threads=4", "--worker-class=gthread", "main:app"]
+CMD ["sh", "start.sh"]
