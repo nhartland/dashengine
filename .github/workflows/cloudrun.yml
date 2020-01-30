@@ -40,3 +40,5 @@ jobs:
          --region ${{ secrets.GCLOUD_REGION }}
          --project ${{ secrets.GCLOUD_PROJECT }} 
          --image eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
+         --memory 2Gi
+         --max-instances 1 
