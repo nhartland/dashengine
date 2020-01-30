@@ -6,16 +6,17 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-latest
     steps:
+    # Check out master branch
      - name: Checkout
        uses: actions/checkout@master
-
-       #     - name: GCP Authentication
-       #     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-       #       with:
-       #         version: '275.0.0'
-       #         service_account_email: ${{ secreted.GCLOUD_EMAIL }}
-       #         service_account_key: ${{ secrets.GCLOUD_AUTH }}
-       #     - run: gcloud info
+    # Authenticate with GCP
+     - name: GCP Authentication
+     - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+       with:
+         version: '275.0.0'
+         service_account_email: ${{ secrets.GCLOUD_EMAIL }}
+         service_account_key: ${{ secrets.GCLOUD_AUTH }}
+     - run: gcloud info
        #
        #
        #     # Build the Docker image
