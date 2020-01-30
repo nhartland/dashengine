@@ -80,3 +80,6 @@ by Google's default authentication credentials.
 
 1. Final documentation, quickstart, skeleton page, etc
 2. Write some documentation on how the query registry works etc
+3. Merge to master
+4. Push to dockerhub
+5. Write demo dockerfile
