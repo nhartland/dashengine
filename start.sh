@@ -6,6 +6,8 @@ DEMODIR=/app/demo
 # Check for queries folder, if it doesn't exist, use the demo
 if [ ! -d $WORKDIR/queries ]; then
   echo "No \`queries\' directory found, using demo queries"
+  echo $DEMODIR/queries
+  ls $DEMODIR/queries
   cp -r $DEMODIR/queries $WORKDIR/queries
 fi
 
