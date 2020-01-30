@@ -16,7 +16,6 @@ jobs:
          version: '275.0.0'
          service_account_email: ${{ secrets.GCLOUD_EMAIL }}
          service_account_key: ${{ secrets.GCLOUD_AUTH }}
-       run: gcloud info
        #
        #
        #     # Build the Docker image
