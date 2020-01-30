@@ -16,9 +16,10 @@ jobs:
          version: '275.0.0'
          service_account_email: ${{ secrets.GCLOUD_EMAIL }}
          service_account_key: ${{ secrets.GCLOUD_AUTH }}
-     - name: Check
+    # Set Project ID
+     - name: Set project-ID
        run: |        
-         gcloud info
+         gcloud config set project ${{ secrets.GCLOUD_PROJECT }}
     # Build the Docker image
      - name: Build
        run: |        
