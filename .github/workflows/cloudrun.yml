@@ -1,5 +1,9 @@
 # Automated Deployment via GitHub actions
 # Required secrets:
+#  GCLOUD_AUTH:         base64-encoded JSON authentication key for service account
+#  GCLOUD_REGION:       GCP Region for deployment (e.g europe-west1)
+#  GCLOUD_PROJECT:      GCP Project ID for the target project 
+#  GCLOUD_APP_NAME:     Name of the target Cloud Run Application
 name: Deploy DashEngine to Cloud Run
 on: [push]
 
@@ -30,6 +34,6 @@ jobs:
          --quiet 
          --platform managed 
          --allow-unauthenticated 
-         --region europe-west1 
+         --region ${{ secrets.GCLOUD_REGION }}
          --project ${{ secrets.GCLOUD_PROJECT }} 
          --image eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
