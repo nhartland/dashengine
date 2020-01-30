@@ -20,10 +20,9 @@ jobs:
     # Build the Docker image
      - name: Build
        run: >
-         gcloud builds submit
-            --project ${{ secrets.GCLOUD_PROJECT }}
-            --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
-            .
+         gcloud builds submit .
+         --project ${{ secrets.GCLOUD_PROJECT }}
+         --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
     # Deploy to Cloud Run
      - name: Deploy
        run: >
