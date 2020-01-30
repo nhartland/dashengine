@@ -16,16 +16,15 @@ jobs:
        uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
        with:
          version: '275.0.0'
-         #service_account_email: ${{ secrets.GCLOUD_EMAIL }}
          service_account_key: ${{ secrets.GCLOUD_AUTH }}
     # Set Project ID
-     - name: Set project-ID
-       run: |        
-         gcloud config set project ${{ secrets.GCLOUD_PROJECT }}
+    # - name: Set project-ID
+    #   run: |        
+    #     gcloud config set project ${{ secrets.GCLOUD_PROJECT }}
     # Build the Docker image
      - name: Build
        run: |        
-         gcloud builds submit --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }} .
+         gcloud builds submit --project ${{ secrets.GCLOUD_PROJECT }} --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }} .
     # Deploy to Cloud Run
      - name: Deploy
        run: |
