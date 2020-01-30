@@ -1,5 +1,7 @@
 # Skeleton Dash App on Google App Engine
 
+![Build](https://github.com/nhartland/dashengine/workflows/Cloud%20Run%20Deployment/badge.svg)
+
 ## Aims
 I want to have a basic skeleton of an App Engine dashboard, querying data from
 BigQuery in a maintainable fashion. I should be able to fork this repository to
