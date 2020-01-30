@@ -11,7 +11,7 @@ yaml = YAML(typ="safe")
 # Configuration
 CONFIG_PATH = "config.yaml"
 # Setup cache
-with open(CONFIG_PATH, 'r') as infile:
+with open(CONFIG_PATH, "r") as infile:
     CONFIGURATION = yaml.load(infile)
 
 # Setup dash application
@@ -20,8 +20,7 @@ dashapp.config.suppress_callback_exceptions = True  # Required as multi-page
 dashapp.title = CONFIGURATION["APP_NAME"]
 
 # Setup server secret key for CSRF protection
-dashapp.server.secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
+dashapp.server.secret_key = os.environ.get("SECRET_KEY", "default-secret-key")
 
 # Setup cache according to configuration
 cache = Cache(dashapp.server, config=CONFIGURATION["cache-config"])
-

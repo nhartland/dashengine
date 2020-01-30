@@ -33,10 +33,11 @@ class BigQuery:
         body (str): The query body itself.
         parameter_spec (dict): A dictionary of query parameter specifications keyed by name.
     """
-    query_id:       str
-    name:           str
-    description:    str
-    body:           str
+
+    query_id: str
+    name: str
+    description: str
+    body: str
     parameter_spec: dict
 
 
@@ -57,18 +58,19 @@ class BigQueryResult:
         bytes_billed (float): The amount of billable bytes processed in BQ.
         bytes_processed (float): The total number of bytes processed in BQ.
     """
-    uuid:       str
-    source:     BigQuery
+
+    uuid: str
+    source: BigQuery
     parameters: dict
-    result:     pd.DataFrame
-    time:       datetime.time
-    duration:   datetime.time
+    result: pd.DataFrame
+    time: datetime.time
+    duration: datetime.time
     bytes_billed: float
     bytes_processed: float
 
     def memory_usage(self) -> float:
         """ Returns the memory usage of the stored dataframe in MB. """
-        return self.result.memory_usage(index=True, deep=True).sum() / 1.E6
+        return self.result.memory_usage(index=True, deep=True).sum() / 1.0e6
 
 
 def _load_query(query_id: str) -> BigQuery:
@@ -83,20 +85,22 @@ def _load_query(query_id: str) -> BigQuery:
         (BigQuery): The query and query metadata.
     """
     logger = logging.getLogger(__name__)
-    target_queryfile = os.path.join(QUERY_DATA_DIRECTORY, query_id + '.yml')
+    target_queryfile = os.path.join(QUERY_DATA_DIRECTORY, query_id + ".yml")
 
-    with open(target_queryfile, 'r') as infile:
+    with open(target_queryfile, "r") as infile:
         try:
             qdata = yaml.load(infile)
             # Build query object
-            query_object = BigQuery(query_id,
-                                    qdata["name"],
-                                    qdata["description"],
-                                    qdata["body"],
-                                    qdata.get("parameters", []))
+            query_object = BigQuery(
+                query_id,
+                qdata["name"],
+                qdata["description"],
+                qdata["body"],
+                qdata.get("parameters", []),
+            )
             return query_object
 
-        #TODO figure out better error handling scheme
+        # TODO figure out better error handling scheme
         except yaml.YAMLError as exc:
             logger.error(exc)
             raise exc
@@ -155,7 +159,9 @@ def _build_query_parameters(query: BigQuery, parameters: dict) -> list:
             bqparam = bigquery.ScalarQueryParameter(pname, ptype, parameters[pname])
         else:
             if type(parameters[pname]) != list:
-                raise RuntimeError(f"Query '{query.name}' expects parameter '{pname}' to be a list")
+                raise RuntimeError(
+                    f"Query '{query.name}' expects parameter '{pname}' to be a list"
+                )
             bqparam = bigquery.ArrayQueryParameter(pname, ptype, parameters[pname])
         query_params.append(bqparam)
     return query_params
@@ -172,8 +178,7 @@ def _register_query(query_id: str, parameters: dict):
     registry = cache.get("query-registry")
     if registry is None:
         registry = {}
-    registry[registry_key] = {"query_id": query_id,
-                              "parameters": parameters}
+    registry[registry_key] = {"query_id": query_id, "parameters": parameters}
     cache.set("query-registry", registry)
 
 
@@ -211,11 +216,13 @@ def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
     _register_query(query_id, parameters)
 
     # Form up results class
-    return BigQueryResult(str(uuid.uuid4()),
-                          query,
-                          parameters,
-                          query_data,
-                          query_result.ended,
-                          (query_result.ended - query_result.started).microseconds / 1.E6,
-                          query_result.total_bytes_billed,
-                          query_result.total_bytes_processed)
+    return BigQueryResult(
+        str(uuid.uuid4()),
+        query,
+        parameters,
+        query_data,
+        query_result.ended,
+        (query_result.ended - query_result.started).microseconds / 1.0e6,
+        query_result.total_bytes_billed,
+        query_result.total_bytes_processed,
+    )
