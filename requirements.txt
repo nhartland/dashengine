@@ -8,7 +8,7 @@ cachetools==3.1.1         # via google-auth
 certifi==2019.11.28       # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via flask
-dash-bootstrap-components==0.7.3rc1
+dash-bootstrap-components==0.8.2
 dash-core-components==1.6.0  # via dash
 dash-html-components==1.0.2  # via dash
 dash-table==4.5.1         # via dash
