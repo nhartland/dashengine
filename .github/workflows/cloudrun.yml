@@ -1,0 +1,44 @@
+# Automated Deployment via GitHub actions
+# Required secrets:
+#  GCLOUD_AUTH:         base64-encoded JSON authentication key for service account
+#  GCLOUD_REGION:       GCP Region for deployment (e.g europe-west1)
+#  GCLOUD_PROJECT:      GCP Project ID for the target project 
+#  GCLOUD_APP_NAME:     Name of the target Cloud Run Application
+name: Cloud Run Deployment
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+    # Check out master branch
+     - name: Checkout
+       uses: actions/checkout@master
+    # Authenticate with GCP
+     - name: GCP Authentication
+       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+       with:
+         version: '275.0.0'
+         service_account_key: ${{ secrets.GCLOUD_AUTH }}
+    # Build the Docker image
+     - name: Build
+       run: >
+         gcloud builds submit .
+         --project ${{ secrets.GCLOUD_PROJECT }}
+         --tag eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
+    # Deploy to Cloud Run
+     - name: Deploy
+       run: >
+         gcloud run deploy ${{ secrets.GCLOUD_APP_NAME }} 
+         --quiet 
+         --platform managed 
+         --allow-unauthenticated 
+         --region ${{ secrets.GCLOUD_REGION }}
+         --project ${{ secrets.GCLOUD_PROJECT }} 
+         --image eu.gcr.io/${{ secrets.GCLOUD_PROJECT }}/${{ secrets.GCLOUD_APP_NAME }}
+         --memory 2Gi
+         --max-instances 1 
