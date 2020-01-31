@@ -74,7 +74,7 @@ number of features.
 5. Queries have their performance metrics (time, data use) recorded for analysis.
 
 
-## Query caching
+### Query caching
 
 Query results are cached via
 [flask-caching](https://flask-caching.readthedocs.io/). Note that the default
@@ -85,7 +85,7 @@ instance.  Furthermore this caching, being in-instance-memory, is not preserved
 across instances. This can be easily modified by using an external cache e.g
 Redis, for which support is built-in.
 
-## Profiler
+### Profiler
 
 The query profiler provides summary information on the performance of cached
 queries.  The profiler can work (although maybe not perfectly) even in a
@@ -95,7 +95,7 @@ if in any given thread the query has not been cached, the thread is able to
 re-run the query to display profiling information.
 
 
-## Credentials
+### Credentials
 
 Are obtained through `google.auth.default`.
 
