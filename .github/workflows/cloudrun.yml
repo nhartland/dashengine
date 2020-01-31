@@ -5,11 +5,10 @@
 #  GCLOUD_PROJECT:      GCP Project ID for the target project 
 #  GCLOUD_APP_NAME:     Name of the target Cloud Run Application
 name: Cloud Run Deployment
-on: [push]
-#on:
-#  push:
-#    branches:
-#      - master
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build-and-deploy:
