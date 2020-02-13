@@ -15,6 +15,8 @@ Such boilerplate includes:
 
 ## Quickstart
 
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
+
 See the `demo` subdirectory for an example of a complete Dashengine
 application including multiple pages, (parametrised) queries and profiling.
 
