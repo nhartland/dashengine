@@ -122,7 +122,7 @@ def _query_profile_table(_) -> dt.DataTable:
         {
             "ID": query.source.query_id,
             "UUID": query.uuid,
-            "Parameters": json.dumps(query.parameters),
+            "Parameters": json.dumps(query.parameters, default=str),
             "Duration": query.duration,
             "Memory Usage": query.memory_usage(),
             "Bytes Processed": query.bytes_processed,

@@ -174,7 +174,7 @@ def _register_query(query_id: str, parameters: dict):
         for debug purposes and therefore should normally only be
         run in a single-threaded debug server.
     """
-    registry_key = query_id + ":" + json.dumps(parameters, sort_keys=True)
+    registry_key = query_id + ":" + json.dumps(parameters, sort_keys=True, default=str)
     registry = cache.get("query-registry")
     if registry is None:
         registry = {}
