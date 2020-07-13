@@ -3,6 +3,7 @@ dash-bootstrap-components
 flask-caching
 ruamel.yaml
 google-cloud-bigquery
+google.cloud.logging
 pandas
 redis
 gunicorn
