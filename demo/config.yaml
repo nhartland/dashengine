@@ -1,6 +1,9 @@
 # Name to run in NavBar
 APP_NAME: 'DashEngine'
 
+# Flag for enabling Cloud IAP for an App Engine based application
+appengine_iap: true
+
 # Configuration for flask-caching
 # See documentation at
 # https://pythonhosted.org/Flask-Caching/#configuring-flask-caching
