@@ -1,6 +1,3 @@
-# System
-import logging
-
 # Dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -12,9 +9,16 @@ from dashengine.dashapp import dashapp, cache
 from dashengine.dashapp import CONFIGURATION
 import dashengine.pageloader as pageloader
 
+# logging
+import logging
+import google.cloud.logging
+from google.cloud.logging.handlers import CloudLoggingHandler, setup_logging
 
-# Setup logging level
-logging.basicConfig(level=logging.DEBUG)
+# Setup log handler
+log_client = google.cloud.logging.Client()
+log_handler = CloudLoggingHandler(log_client)
+logging.getLogger().setLevel(logging.INFO)
+setup_logging(log_handler)
 
 # Setup 'app' variable for GAE
 app = dashapp.server
