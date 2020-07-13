@@ -1,7 +1,6 @@
 import os
 import uuid
 import json
-import logging
 import datetime
 import google.auth
 import pandas as pd
@@ -84,7 +83,6 @@ def _load_query(query_id: str) -> BigQuery:
     Returns:
         (BigQuery): The query and query metadata.
     """
-    logger = logging.getLogger(__name__)
     target_queryfile = os.path.join(QUERY_DATA_DIRECTORY, query_id + ".yml")
 
     with open(target_queryfile, "r") as infile:
@@ -102,7 +100,8 @@ def _load_query(query_id: str) -> BigQuery:
 
         # TODO figure out better error handling scheme
         except yaml.YAMLError as exc:
-            logger.error(exc)
+            import logging
+            logging.error(exc)
             raise exc
 
 
