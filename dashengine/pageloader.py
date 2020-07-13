@@ -10,7 +10,6 @@ import logging
 def page_loader(roots: list) -> dict:
     """ Reads page modules from subdirectories specified in the `roots` list,
     and returns them in a dictionary keyed by module.ROUTE. """
-    efe = 54
     page_dict = {}
     for root in roots:
         for importer, package_name, _ in pkgutil.iter_modules([root]):
