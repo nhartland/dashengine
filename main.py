@@ -9,12 +9,6 @@ from dashengine.dashapp import dashapp, cache
 from dashengine.dashapp import CONFIGURATION
 import dashengine.pageloader as pageloader
 
-# logging
-import google.cloud.logging
-client = google.cloud.logging.Client()
-client.get_default_handler()
-client.setup_logging()
-
 # Setup 'app' variable for GAE
 app = dashapp.server
 
