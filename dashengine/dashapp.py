@@ -15,7 +15,13 @@ with open(CONFIG_PATH, "r") as infile:
     CONFIGURATION = yaml.load(infile)
 
 # Setup dash application
-dashapp = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+dashapp = dash.Dash(
+    __name__,
+    external_stylesheets=[dbc.themes.BOOTSTRAP],
+    meta_tags=[
+        {"name": "viewport", "content": "width=device-width, initial-scale=1.0, user-scalable=\"no\""}
+    ],
+)
 dashapp.config.suppress_callback_exceptions = True  # Required as multi-page
 dashapp.title = CONFIGURATION["APP_NAME"]
 

@@ -101,6 +101,7 @@ def _load_query(query_id: str) -> BigQuery:
         # TODO figure out better error handling scheme
         except yaml.YAMLError as exc:
             import logging
+
             logging.error(exc)
             raise exc
 
