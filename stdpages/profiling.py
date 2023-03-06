@@ -5,9 +5,7 @@ import json
 import plotly.graph_objs as go
 
 # Dash
-import dash_table as dt
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc, html, dash_table
 from dash.dependencies import Input, Output
 
 # DashEngine
@@ -114,7 +112,7 @@ def _query_profile_summary_chart(_) -> go.Figure:
     Output("query-profile-table-div", "children"),
     [Input("profile-trigger", "children")],
 )
-def _query_profile_table(_) -> dt.DataTable:
+def _query_profile_table(_) -> dash_table.DataTable:
     """ Generates a table profiling all cached queries. """
     cached_queries = bigquery.fetch_cached_queries()
     # Setup all data for the table
@@ -134,7 +132,7 @@ def _query_profile_table(_) -> dt.DataTable:
     # Build list of columns from the data keys
     columns = [{"name": i, "id": i} for i in data[0]]
     # Build datatable
-    return dt.DataTable(
+    return dash_table.DataTable(
         id="query-profile-table",
         columns=columns,
         data=data,
@@ -172,7 +170,7 @@ def _query_profile_parameters(selected_query):
     parameter_data = [
         {"Parameter": key, "Value": str(value)} for key, value in parameters.items()
     ]
-    return dt.DataTable(
+    return dash_table.DataTable(
         id="query-profile-parameter-table",
         columns=columns,
         data=parameter_data,
@@ -181,10 +179,10 @@ def _query_profile_parameters(selected_query):
     )
 
 
-def _query_profile_preview(selected_query) -> dt.DataTable:
+def _query_profile_preview(selected_query) -> dash_table.DataTable:
     """ Returns the formatted SQL body of the selected query. """
     df = selected_query.result.head()
-    return dt.DataTable(
+    return dash_table.DataTable(
         id="query-profile-preview-table",
         columns=[{"name": i, "id": i} for i in df.columns],
         style_table={"margin-bottom": "30px"},
