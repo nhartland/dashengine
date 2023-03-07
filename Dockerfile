@@ -1,4 +1,4 @@
-FROM python:3.7 
+FROM python:3.10 
 
 # Copy over requirements and install them
 COPY requirements.txt /
