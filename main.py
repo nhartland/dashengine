@@ -40,7 +40,7 @@ dashapp.layout = html.Div(
 
 @dashapp.callback(Output("global-navigation", "children"), [Input("url", "pathname")])
 def navigation_dropdown(pathname) -> list:
-    """ Builds the navigation dropdown for the dashboards. """
+    """Builds the navigation dropdown for the dashboards."""
     return [
         dbc.DropdownMenuItem(
             mod.LINKNAME, href=mod.ROUTE, active=(pathname == mod.ROUTE)

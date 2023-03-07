@@ -19,7 +19,10 @@ dashapp = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     meta_tags=[
-        {"name": "viewport", "content": "width=device-width, initial-scale=1.0, user-scalable=\"no\""}
+        {
+            "name": "viewport",
+            "content": 'width=device-width, initial-scale=1.0, user-scalable="no"',
+        }
     ],
 )
 dashapp.config.suppress_callback_exceptions = True  # Required as multi-page

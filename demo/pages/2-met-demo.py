@@ -14,7 +14,7 @@ LINKNAME = "Met Demo"
 
 
 def __available_departments() -> list:
-    """ Returns a list of all departments in the dataset. """
+    """Returns a list of all departments in the dataset."""
     return bigquery.run_query("met-objects-by-department").result.department.tolist()
 
 
@@ -22,7 +22,7 @@ def __available_departments() -> list:
     Output("met-items-by-department", "figure"), [Input("met-trigger", "children")]
 )
 def items_by_department(_) -> go.Figure:
-    """ Returns a Graph displaying items per department for the Met."""
+    """Returns a Graph displaying items per department for the Met."""
     query_data = bigquery.run_query("met-objects-by-department").result
     bar = go.Bar(x=query_data["department"], y=query_data["n_items"])
     layout = go.Layout(
@@ -35,7 +35,7 @@ def items_by_department(_) -> go.Figure:
     Output("met-items-by-date", "figure"), [Input("met-dropdown-filter", "value")]
 )
 def items_by_date(selected_department: str) -> go.Figure:
-    """ Histogram of items per date, optionally selecting by department."""
+    """Histogram of items per date, optionally selecting by department."""
     # Running a BQ parametrised query on creation date and departments
     min_creation_date = 1800
 

@@ -22,13 +22,13 @@ LINKNAME = "Profiling"
 
 
 def __fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
-    """ Fetches a cached BigQuery result from its UUID.
+    """Fetches a cached BigQuery result from its UUID.
 
-        Args:
-            uuid (str): The UUID of the query to be retrieved.
+    Args:
+        uuid (str): The UUID of the query to be retrieved.
 
-        Returns:
-            (BigQueryResult): The corresponding BigQuery result object.
+    Returns:
+        (BigQueryResult): The corresponding BigQuery result object.
     """
     # Fetch cached queries
     queries = bigquery.fetch_cached_queries()
@@ -43,16 +43,16 @@ def __fetch_query_from_uuid(uuid: str) -> bigquery.BigQueryResult:
 
 
 def __index_query(query, key: str) -> float:
-    """ Returns a property of the query class, keyed by a string.
-        The key must be one of:
-            ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
+    """Returns a property of the query class, keyed by a string.
+    The key must be one of:
+        ['Memory', 'Duration', 'Bytes Processed', 'Bytes Billed']
 
-        Args:
-            query (BigQueryResult): A BigQuery result class
-            key (string): A key of the BigQueryResult object
+    Args:
+        query (BigQueryResult): A BigQuery result class
+        key (string): A key of the BigQueryResult object
 
-        Returns:
-            (float): The value in `query` corresponding to the key.
+    Returns:
+        (float): The value in `query` corresponding to the key.
     """
     ResultDict = {
         "Memory": query.memory_usage(),
@@ -64,7 +64,7 @@ def __index_query(query, key: str) -> float:
 
 
 def __normalising_constants(cached_queries: list):
-    """ Computes totals over the full set of cached queries to normalise the summary chart. """
+    """Computes totals over the full set of cached queries to normalise the summary chart."""
     totals = {
         "Memory": 0.0,
         "Duration": 0.0,
@@ -89,13 +89,13 @@ def __normalising_constants(cached_queries: list):
     [Input("profile-trigger", "children")],
 )
 def _query_profile_summary_chart(_) -> go.Figure:
-    """ Generates a set of bar charts for a single query. """
+    """Generates a set of bar charts for a single query."""
     cached_queries = bigquery.fetch_cached_queries()
     yvals = ["Memory", "Duration", "Bytes Processed", "Bytes Billed"]
     totals = __normalising_constants(cached_queries)
 
     def __bar(query):
-        """ Generate a single bar. """
+        """Generate a single bar."""
         return go.Bar(
             y=yvals,
             x=[100 * __index_query(query, key) / totals[key] for key in yvals],
@@ -113,7 +113,7 @@ def _query_profile_summary_chart(_) -> go.Figure:
     [Input("profile-trigger", "children")],
 )
 def _query_profile_table(_) -> dash_table.DataTable:
-    """ Generates a table profiling all cached queries. """
+    """Generates a table profiling all cached queries."""
     cached_queries = bigquery.fetch_cached_queries()
     # Setup all data for the table
     data = [
@@ -151,14 +151,14 @@ def _query_profile_table(_) -> dash_table.DataTable:
 
 
 def _query_profile_body(selected_query) -> dcc.Markdown:
-    """ Returns the formatted SQL body of the selected query. """
+    """Returns the formatted SQL body of the selected query."""
     # Build query body in markdown code block
     query_code = " ``` \n " + selected_query.source.body + " \n ```"
     return dcc.Markdown(query_code)
 
 
 def _query_profile_parameters(selected_query):
-    """ Returns the parameters of the selected query. """
+    """Returns the parameters of the selected query."""
     parameters = selected_query.parameters
     if len(parameters) == 0:
         return html.H6("No parameters")
@@ -180,7 +180,7 @@ def _query_profile_parameters(selected_query):
 
 
 def _query_profile_preview(selected_query) -> dash_table.DataTable:
-    """ Returns the formatted SQL body of the selected query. """
+    """Returns the formatted SQL body of the selected query."""
     df = selected_query.result.head()
     return dash_table.DataTable(
         id="query-profile-preview-table",
@@ -198,7 +198,7 @@ def _query_profile_preview(selected_query) -> dash_table.DataTable:
     ],
 )
 def _query_profile_details(rows, selected_row_indices) -> list:
-    """ Returns the details (SQL and parameters) of the selected query. """
+    """Returns the details (SQL and parameters) of the selected query."""
     if rows is None or len(selected_row_indices) != 1:
         return [
             html.H5(
@@ -225,7 +225,7 @@ def _query_profile_details(rows, selected_row_indices) -> list:
 
 
 def layout() -> list:
-    """ Generates the layout for the query profiling page. """
+    """Generates the layout for the query profiling page."""
     # No queries cached
     if bigquery.fetch_num_cached_queries() == 0:
         return html.H4(

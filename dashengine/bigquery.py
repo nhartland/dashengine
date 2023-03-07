@@ -20,7 +20,7 @@ yaml = YAML(typ="safe")
 
 @dataclass(frozen=True)
 class BigQuery:
-    """ A BigQuery query message.
+    """A BigQuery query message.
 
     This class contains the name, description and body of a query intended for
     BigQuery.
@@ -42,7 +42,7 @@ class BigQuery:
 
 @dataclass(frozen=True)
 class BigQueryResult:
-    """ Results of a BigQuery request.
+    """Results of a BigQuery request.
 
     This class stores the results returned from querying
     a BigQuery dataset, along with some metadata.
@@ -68,12 +68,12 @@ class BigQueryResult:
     bytes_processed: float
 
     def memory_usage(self) -> float:
-        """ Returns the memory usage of the stored dataframe in MB. """
+        """Returns the memory usage of the stored dataframe in MB."""
         return self.result.memory_usage(index=True, deep=True).sum() / 1.0e6
 
 
 def _load_query(query_id: str) -> BigQuery:
-    """ Loads a query from file by query id.
+    """Loads a query from file by query id.
     This function reads a query from file, according to the provided id, and
     returns it as a BigQuery object.
 
@@ -107,10 +107,10 @@ def _load_query(query_id: str) -> BigQuery:
 
 
 def fetch_num_cached_queries() -> int:
-    """ Lists all cached queries.
+    """Lists all cached queries.
 
-        Returns:
-            (list): A list of all cached queries in the form of BigQueryResult objects.
+    Returns:
+        (list): A list of all cached queries in the form of BigQueryResult objects.
     """
     # Fetch registry of queries
     registry = cache.get("query-registry")
@@ -120,10 +120,10 @@ def fetch_num_cached_queries() -> int:
 
 
 def fetch_cached_queries() -> list:
-    """ Lists all cached queries.
+    """Lists all cached queries.
 
-        Returns:
-            (list): A list of all cached queries in the form of BigQueryResult objects.
+    Returns:
+        (list): A list of all cached queries in the form of BigQueryResult objects.
     """
     # Fetch registry of queries
     registry = cache.get("query-registry")
@@ -137,15 +137,15 @@ def fetch_cached_queries() -> list:
 
 
 def _build_query_parameters(query: BigQuery, parameters: dict) -> list:
-    """ Builds the parameter list for a BigQuery job from a supplied
-        list of parameter values.
+    """Builds the parameter list for a BigQuery job from a supplied
+    list of parameter values.
 
-        Args:
-            query (BigQuery): A query with parameter specification.
-            parameters (dict): Corresponding dict of parameters and supplied values.
+    Args:
+        query (BigQuery): A query with parameter specification.
+        parameters (dict): Corresponding dict of parameters and supplied values.
 
-        Returns:
-            (list) A list of BigQuery parameters.
+    Returns:
+        (list) A list of BigQuery parameters.
     """
     # Build query parameters
     query_params = []
@@ -168,11 +168,11 @@ def _build_query_parameters(query: BigQuery, parameters: dict) -> list:
 
 
 def _register_query(query_id: str, parameters: dict):
-    """ Add a query and it's parameters to the query registry.
+    """Add a query and it's parameters to the query registry.
 
-        Note that this is not thread-safe: The registry is meant
-        for debug purposes and therefore should normally only be
-        run in a single-threaded debug server.
+    Note that this is not thread-safe: The registry is meant
+    for debug purposes and therefore should normally only be
+    run in a single-threaded debug server.
     """
     registry_key = query_id + ":" + json.dumps(parameters, sort_keys=True, default=str)
     registry = cache.get("query-registry")
@@ -184,7 +184,7 @@ def _register_query(query_id: str, parameters: dict):
 
 @cache.memoize(timeout=300)
 def run_query(query_id: str, parameters: dict = {}) -> BigQueryResult:
-    """ Performs a query over BigQuery and returns the result.
+    """Performs a query over BigQuery and returns the result.
 
     This function reads a query from file, according to the provided id, and
     executes it in Google BigQuery. The result is returned as a

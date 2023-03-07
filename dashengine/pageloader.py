@@ -7,8 +7,8 @@ import importlib
 
 
 def page_loader(roots: list) -> dict:
-    """ Reads page modules from subdirectories specified in the `roots` list,
-    and returns them in a dictionary keyed by module.ROUTE. """
+    """Reads page modules from subdirectories specified in the `roots` list,
+    and returns them in a dictionary keyed by module.ROUTE."""
     import logging
 
     page_dict = {}
