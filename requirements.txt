@@ -28,6 +28,8 @@ dash-html-components==2.0.0
     # via dash
 dash-table==5.0.0
     # via dash
+db-dtypes==1.0.5
+    # via -r ./requirements.in
 flask==2.2.3
     # via
     #   dash
@@ -90,11 +92,18 @@ markupsafe==2.1.2
     #   jinja2
     #   werkzeug
 numpy==1.24.2
-    # via pandas
+    # via
+    #   db-dtypes
+    #   pandas
+    #   pyarrow
 packaging==23.0
-    # via google-cloud-bigquery
+    # via
+    #   db-dtypes
+    #   google-cloud-bigquery
 pandas==1.5.3
-    # via -r ./requirements.in
+    # via
+    #   -r ./requirements.in
+    #   db-dtypes
 plotly==5.13.1
     # via dash
 proto-plus==1.22.2
@@ -113,6 +122,8 @@ protobuf==4.22.0
     #   grpc-google-iam-v1
     #   grpcio-status
     #   proto-plus
+pyarrow==11.0.0
+    # via db-dtypes
 pyasn1==0.4.8
     # via
     #   pyasn1-modules
