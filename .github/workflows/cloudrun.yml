@@ -1,6 +1,5 @@
 # Automated Deployment via GitHub actions
 # Required secrets:
-#  GCLOUD_AUTH:         base64-encoded JSON authentication key for service account
 #  GCLOUD_REGION:       GCP Region for deployment (e.g europe-west1)
 #  GCLOUD_PROJECT:      GCP Project ID for the target project 
 #  GCLOUD_APP_NAME:     Name of the target Cloud Run Application
@@ -18,12 +17,15 @@ jobs:
     # Check out master branch
      - name: Checkout
        uses: actions/checkout@master
-    # Authenticate with GCP
-     - name: GCP Authentication
-       uses: GoogleCloudPlatform/github-actions/setup-gcloud@v1.1.0
+    # Authenticate to GCP 
+     - name: Authenticate
+       uses: 'google-github-actions/auth@v1'
        with:
-         version: '275.0.0'
-         service_account_key: ${{ secrets.GCLOUD_AUTH }}
+         workload_identity_provider: 'projects/786649440348/locations/global/workloadIdentityPools/wip-pool/providers/wip-provider'
+         service_account: 'github-actions@${{ secrets.GCLOUD_PROJECT }}.iam.gserviceaccount.com'    
+    # Install gcloud sdk
+     - name: Set up Cloud SDK
+       uses: google-github-actions/setup-gcloud@v0
     # Build the Docker image
      - name: Build
        run: >
