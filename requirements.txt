@@ -140,7 +140,7 @@ pytz==2022.7.1
     # via pandas
 redis==4.5.4
     # via -r requirements.in
-requests==2.28.2
+requests==2.32.2
     # via
     #   google-api-core
     #   google-cloud-bigquery
