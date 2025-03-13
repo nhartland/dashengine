@@ -81,7 +81,7 @@ grpcio==1.51.3
     #   grpcio-status
 grpcio-status==1.51.3
     # via google-api-core
-gunicorn==20.1.0
+gunicorn==22.0.0
     # via -r requirements.in
 idna==3.4
     # via requests
@@ -102,6 +102,7 @@ packaging==23.0
     # via
     #   db-dtypes
     #   google-cloud-bigquery
+    #   gunicorn
 pandas==1.5.3
     # via
     #   -r requirements.in
@@ -160,6 +161,3 @@ urllib3==1.26.14
     # via requests
 werkzeug==3.0.6
     # via flask
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
