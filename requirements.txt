@@ -83,7 +83,7 @@ grpcio-status==1.51.3
     # via google-api-core
 gunicorn==20.1.0
     # via -r requirements.in
-idna==3.4
+idna==3.7
     # via requests
 itsdangerous==2.1.2
     # via flask
