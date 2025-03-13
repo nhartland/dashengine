@@ -70,7 +70,7 @@ googleapis-common-protos[grpc]==1.58.0
     #   grpcio-status
 grpc-google-iam-v1==0.12.6
     # via google-cloud-logging
-grpcio==1.51.3
+grpcio==1.53.2
     # via
     #   google-api-core
     #   google-cloud-bigquery
@@ -146,6 +146,8 @@ rsa==4.9
     # via google-auth
 ruamel-yaml==0.17.21
     # via -r requirements.in
+ruamel-yaml-clib==0.2.12
+    # via ruamel-yaml
 six==1.16.0
     # via
     #   google-auth
