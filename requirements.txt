@@ -138,7 +138,7 @@ pytz==2022.7.1
     # via pandas
 redis==4.5.4
     # via -r requirements.in
-requests==2.28.2
+requests==2.32.2
     # via
     #   google-api-core
     #   google-cloud-bigquery
@@ -146,6 +146,8 @@ rsa==4.9
     # via google-auth
 ruamel-yaml==0.17.21
     # via -r requirements.in
+ruamel-yaml-clib==0.2.12
+    # via ruamel-yaml
 six==1.16.0
     # via
     #   google-auth
