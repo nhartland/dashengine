@@ -156,7 +156,7 @@ six==1.16.0
     #   python-dateutil
 tenacity==8.2.2
     # via plotly
-urllib3==1.26.14
+urllib3==1.26.19
     # via requests
 werkzeug==3.0.6
     # via flask
